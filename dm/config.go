@@ -58,8 +58,12 @@ func Load(filepath string) (*webserver.WebServer, error) {
 		Handlers: make(map[string]interface{}),
 	}
 	localHandler.Handlers["test"] = &RPCMethod{}
+	localHandler.Handlers["task"] = &tr.RPCTask{}
+	localHandler.Handlers["pipeline"] = &tr.RPCPipeline{}
 
-	rpcproxy.Handlers["dm"] = localHandler
+	rpcproxy.RegisterLocalHandler("dm", localHandler)
+
+	//rpcproxy.Handlers["dm"] = localHandler
 
 	r := mux.NewRouter()
 	rpcproxy.Register(r)
@@ -70,7 +74,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 		Node: tr.TaskNode{
 			TaskID: "CPP",
 			Params: map[string]interface{}{
-				"destination": "/home/wq/Project/dm/d.zip",
+				"destination": "/home/wq/Project/dm/",
 			},
 			NextNode: []tr.TaskNode{
 				tr.TaskNode{

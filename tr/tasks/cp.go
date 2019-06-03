@@ -1,8 +1,10 @@
 package tasks
 
 import (
-	"github.com/berlingoqc/dm/tr"
+	"path/filepath"
+
 	"github.com/berlingoqc/dm/file"
+	"github.com/berlingoqc/dm/tr"
 )
 
 // CPTask ...
@@ -37,26 +39,21 @@ func (c *CPTask) GetInfo() tr.TaskInfo {
 }
 
 // Execute ...
-func (c *CPTask) Execute(filepath string, params map[string]interface{}, channel chan tr.TaskFeedBack) {
+func (c *CPTask) Execute(fp string, params map[string]interface{}, channel chan tr.TaskFeedBack) {
 	var err error
-	defer func() {
-		if err != nil {
-			channel <- tr.TaskFeedBack{
-				Event: "ERROR",
-				Message: err,
-			}
-		}
-	}()
+	defer tr.SendError(channel, err)
 	c.destination = params["destination"].(string)
-	println("CP : copying ",filepath, " TO ", c.destination)
-	if err = file.Copy(filepath,c.destination); err != nil {
+	println("CP : copying ", fp, " TO ", c.destination)
+
+	// Doit ajouter le nom du fichier a la fin du path de destination pour que ca marche
+	fileName := filepath.Base(fp)
+	c.destination = filepath.Join(c.destination, fileName)
+
+	if err = file.Copy(fp, c.destination); err != nil {
 		return
 	}
-	channel <- tr.TaskFeedBack{
-		Event: "DONE",
-		Message: tr.TaskOver{
-			Files: []string{""},
-		},
-	}
+	tr.SendDone(channel, tr.TaskOver{
+		Files: []string{c.destination},
+	})
 
 }

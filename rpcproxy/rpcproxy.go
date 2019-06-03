@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"reflect"
 
 	"encoding/json"
 
@@ -21,7 +22,7 @@ func handleRPCProxy(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if err != nil {
 			w.WriteHeader(400)
-			w.Write([]byte("ERROR"))
+			w.Write(ErrorCall(err))
 		}
 	}()
 	if da := r.Header.Get("X-dm-namespace"); da != "" {
@@ -91,4 +92,27 @@ func RPCRequest(host string, call RPCCall, result interface{}) error {
 func Register(mux *mux.Router) {
 	mux.Path("/jsonrpc").Methods("POST").HandlerFunc(handleRPCProxy)
 	mux.Path("/jsonrpc").Methods("GET").HandlerFunc(handleWebSocket)
+
+	// Apres le registering enregistre son module local de system pour les infos
+	// sur les namespace pour la reflection
+	localHandler := &LocalHandler{
+		Handlers: make(map[string]interface{}),
+	}
+	s := &System{
+		Notification: make([]string, 0),
+	}
+	localHandler.Handlers["system"] = s
+	Handlers["system"] = localHandler
+
+	// Ajout la liste des methodes de system
+	ns := "system"
+	fooType := reflect.TypeOf(s)
+	for i := 0; i < fooType.NumMethod(); i++ {
+		method := fooType.Method(i)
+		s.Methods = append(s.Methods, ns+"."+method.Name)
+	}
+
+	for k := range Handlers {
+		s.Namesapce = append(s.Namesapce, k)
+	}
 }
