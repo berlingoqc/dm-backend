@@ -47,3 +47,16 @@ func (a *LocalHandler) Handle(body []byte) ([]byte, error) {
 	}
 	return nil, errors.New("no namespace")
 }
+
+type system struct {
+	Notification []string
+	Methods      []string
+}
+
+func (s system) listNotifications() []string {
+	return s.Notification
+}
+
+func (s system) listMethods() []string {
+	return s.Methods
+}
