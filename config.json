@@ -1,0 +1,9 @@
+{
+  "url": "0.0.0.0:3434",
+  "handler": {
+    "aria2": {
+      "namespace": "aria2",
+      "url": "localhost:6800"
+    }
+  }
+}
