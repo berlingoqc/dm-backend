@@ -24,6 +24,12 @@ type Config struct {
 	Handler map[string]*rpcproxy.RPCHandlerEndpoint `json:"handler"`
 }
 
+type RPCMethod struct{}
+
+func (r *RPCMethod) Hello(world string) string {
+	return "Hello " + world
+}
+
 // Load ...
 func Load(filepath string) (*webserver.WebServer, error) {
 	var config = &Config{}
@@ -47,6 +53,13 @@ func Load(filepath string) (*webserver.WebServer, error) {
 			handler.SetConfig(i)
 		}
 	}
+
+	localHandler := &rpcproxy.LocalHandler{
+		Handlers: make(map[string]interface{}),
+	}
+	localHandler.Handlers["test"] = &RPCMethod{}
+
+	rpcproxy.Handlers["dm"] = localHandler
 
 	r := mux.NewRouter()
 	rpcproxy.Register(r)

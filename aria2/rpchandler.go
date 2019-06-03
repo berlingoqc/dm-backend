@@ -20,6 +20,11 @@ func (a *RPCHandler) SetConfig(config *rpcproxy.RPCHandlerEndpoint) {
 	a.config = config
 }
 
+// Handle ...
+func (a *RPCHandler) Handle(body []byte) ([]byte, error) {
+	return rpcproxy.ProxyRPCRequest(a.config.URL, body)
+}
+
 func init() {
 	rpcproxy.Handlers["aria2"] = &RPCHandler{}
 	tr.Handlers["aria2"] = &FileHandler{}

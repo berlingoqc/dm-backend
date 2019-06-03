@@ -28,27 +28,38 @@ func handleRPCProxy(w http.ResponseWriter, r *http.Request) {
 		if handler, ok := Handlers[da]; ok {
 			println("Proxing for ", da)
 			reader := r.Body
-			body, err := ioutil.ReadAll(reader)
-
-			u := url.URL{Scheme: "http", Host: handler.GetConfig().URL, Path: "/jsonrpc"}
-
-			resp, err := http.Post(u.String(), "appplication/json", bytes.NewBuffer(body))
+			var body []byte
+			body, err = ioutil.ReadAll(reader)
 			if err != nil {
-				println(err)
 				return
 			}
-			defer resp.Body.Close()
-			body, err = ioutil.ReadAll(resp.Body)
+			body, err = handler.Handle(body)
 			if err != nil {
-				println(err)
 				return
 			}
-			w.WriteHeader(resp.StatusCode)
+
+			w.WriteHeader(200)
 			w.Write(body)
 		}
 	} else {
 		println("PAS DE HEADER X-dm-namespace")
 	}
+}
+
+// ProxyRPCRequest ...
+func ProxyRPCRequest(host string, body []byte) ([]byte, error) {
+	u := url.URL{Scheme: "http", Host: host, Path: "/jsonrpc"}
+
+	resp, err := http.Post(u.String(), "appplication/json", bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }
 
 // RPCRequest ...

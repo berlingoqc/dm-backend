@@ -20,4 +20,5 @@ type RPCHandlerEndpoint struct {
 type RPCHandler interface {
 	GetConfig() *RPCHandlerEndpoint
 	SetConfig(*RPCHandlerEndpoint)
+	Handle(body []byte) ([]byte, error)
 }
