@@ -21,7 +21,7 @@ func handleRPCProxy(w http.ResponseWriter, r *http.Request) {
 	var err error
 	defer func() {
 		if err != nil {
-			w.WriteHeader(400)
+			w.WriteHeader(200)
 			w.Write(ErrorCall(err))
 		}
 	}()

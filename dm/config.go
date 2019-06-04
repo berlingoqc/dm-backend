@@ -1,6 +1,7 @@
 package dm
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -24,10 +25,12 @@ type Config struct {
 	Handler map[string]*rpcproxy.RPCHandlerEndpoint `json:"handler"`
 }
 
+// RPCMethod ...
 type RPCMethod struct{}
 
-func (r *RPCMethod) Hello(world string) string {
-	return "Hello " + world
+// Hello ...
+func (r *RPCMethod) Hello(world string) (string, error) {
+	return "Hello " + world, errors.New("CCA")
 }
 
 // Load ...

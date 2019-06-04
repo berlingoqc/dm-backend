@@ -21,12 +21,14 @@ func (a *LocalHandler) GetConfig() *RPCHandlerEndpoint {
 func (a *LocalHandler) SetConfig(config *RPCHandlerEndpoint) {}
 
 // Handle ...
-func (a *LocalHandler) Handle(body []byte) ([]byte, error) {
-	var err error
-	defer func() { 
+func (a *LocalHandler) Handle(body []byte) (b []byte, err error) {
+	defer func() {
 		if e := recover(); e != nil {
-			println("recoving from error")
-			err = errors.New("Recover from unexcpected error");
+			if er, ok := e.(string); ok {
+				err = errors.New(er)
+			} else {
+				err = errors.New("Recover from unexcpected error")
+			}
 		}
 	}()
 	rpcCall := RPCCall{}
@@ -43,14 +45,18 @@ func (a *LocalHandler) Handle(body []byte) ([]byte, error) {
 			methodValue := reflect.ValueOf(handler).MethodByName(method[1])
 			if methodValue.IsValid() {
 				output := methodValue.Call(argsIn)
-				println(output[0].String())
-
+				if len(output) > 1 {
+					if er, ok := output[1].Interface().(error); ok && er != nil {
+						return b, er
+					}
+				}
 				response := make([]interface{}, len(output))
 				for i, v := range output {
 					response[i] = v.Interface()
 				}
 				rpcCall.Result = response
-				return json.Marshal(rpcCall)
+				b, err = json.Marshal(rpcCall)
+				return b, err
 			}
 			err = errors.New("method not found in namespace")
 		}
