@@ -22,6 +22,13 @@ func (a *LocalHandler) SetConfig(config *RPCHandlerEndpoint) {}
 
 // Handle ...
 func (a *LocalHandler) Handle(body []byte) ([]byte, error) {
+	var err error
+	defer func() { 
+		if e := recover(); e != nil {
+			println("recoving from error")
+			err = errors.New("Recover from unexcpected error");
+		}
+	}()
 	rpcCall := RPCCall{}
 	if err := json.Unmarshal(body, &rpcCall); err != nil {
 		return nil, err
@@ -45,11 +52,12 @@ func (a *LocalHandler) Handle(body []byte) ([]byte, error) {
 				rpcCall.Result = response
 				return json.Marshal(rpcCall)
 			}
-			return nil, errors.New("method not found in namespace")
+			err = errors.New("method not found in namespace")
 		}
-		return nil, errors.New("namespace not found")
+		err = errors.New("namespace not found")
 	}
-	return nil, errors.New("no namespace")
+	err = errors.New("no namespace")
+	return nil, err
 }
 
 // System ...
