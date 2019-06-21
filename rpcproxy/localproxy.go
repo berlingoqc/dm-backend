@@ -59,11 +59,13 @@ func (a *LocalHandler) Handle(body []byte) (b []byte, err error) {
 				return b, err
 			}
 			err = errors.New("method not found in namespace")
+			return
 		}
 		err = errors.New("namespace not found")
+		return
 	}
 	err = errors.New("no namespace")
-	return nil, err
+	return
 }
 
 // System ...
