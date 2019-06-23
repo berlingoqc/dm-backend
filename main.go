@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"github.com/berlingoqc/dm/dm"
+	"github.com/berlingoqc/dm-backend/dm"
 )
 
 func main() {

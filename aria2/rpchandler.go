@@ -1,8 +1,8 @@
 package aria2
 
 import (
-	"github.com/berlingoqc/dm/rpcproxy"
-	"github.com/berlingoqc/dm/tr"
+	"github.com/berlingoqc/dm-backend/rpcproxy"
+	"github.com/berlingoqc/dm-backend/tr"
 )
 
 // RPCHandler ...

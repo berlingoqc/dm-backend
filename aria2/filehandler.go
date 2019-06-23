@@ -3,7 +3,7 @@ package aria2
 import (
 	"errors"
 
-	"github.com/berlingoqc/dm/rpcproxy"
+	"github.com/berlingoqc/dm-backend/rpcproxy"
 )
 
 // FileInfo ...

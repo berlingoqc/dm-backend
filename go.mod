@@ -1,4 +1,4 @@
-module github.com/berlingoqc/dm
+module github.com/berlingoqc/dm-backend
 
 go 1.12
 

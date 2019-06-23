@@ -6,17 +6,17 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/berlingoqc/dm/file"
-	"github.com/berlingoqc/dm/rpcproxy"
-	"github.com/berlingoqc/dm/tr"
-	"github.com/berlingoqc/dm/webserver"
+	"github.com/berlingoqc/dm-backend/file"
+	"github.com/berlingoqc/dm-backend/rpcproxy"
+	"github.com/berlingoqc/dm-backend/tr"
+	"github.com/berlingoqc/dm-backend/webserver"
 
 	"github.com/gorilla/mux"
 
 	// load le module
-	_ "github.com/berlingoqc/dm/aria2"
+	_ "github.com/berlingoqc/dm-backend/aria2"
 	// load les tasks de base
-	_ "github.com/berlingoqc/dm/tr/tasks"
+	_ "github.com/berlingoqc/dm-backend/tr/tasks"
 )
 
 // Config ...

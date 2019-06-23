@@ -3,8 +3,8 @@ package dm
 import (
 	"encoding/json"
 
-	"github.com/berlingoqc/dm/rpcproxy"
-	"github.com/berlingoqc/dm/tr"
+	"github.com/berlingoqc/dm-backend/rpcproxy"
+	"github.com/berlingoqc/dm-backend/tr"
 )
 
 // DownloadEvent ...

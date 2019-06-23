@@ -1,8 +1,8 @@
 package tasks
 
 import (
-	"github.com/berlingoqc/dm/file"
-	"github.com/berlingoqc/dm/tr"
+	"github.com/berlingoqc/dm-backend/file"
+	"github.com/berlingoqc/dm-backend/tr"
 	"github.com/mitchellh/mapstructure"
 )
 
