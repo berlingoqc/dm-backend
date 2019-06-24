@@ -26,8 +26,10 @@ func (a *LocalHandler) Handle(body []byte) (b []byte, err error) {
 		if e := recover(); e != nil {
 			if er, ok := e.(string); ok {
 				err = errors.New(er)
+			} else if er, ok := e.(error); ok {
+				err = er
 			} else {
-				err = errors.New("Recover from unexcpected error")
+				err = errors.New("Recover from unexcpected error: ")
 			}
 		}
 	}()

@@ -4,9 +4,13 @@ import (
 	"flag"
 
 	"github.com/berlingoqc/dm-backend/dm"
+	"github.com/getlantern/systray"
 )
 
 func main() {
+
+	//systray.Run(onReady, onExit)
+
 	var configfile string
 
 	flag.StringVar(&configfile, "config", "", "the configuration file")
@@ -18,5 +22,15 @@ func main() {
 	}
 
 	ws.Start()
+
+}
+
+func onReady() {
+	systray.SetTitle("Awesome App")
+	systray.SetTooltip("Pretty awesome超级棒")
+	systray.AddMenuItem("Quit", "Quit the whole app")
+}
+
+func onExit() {
 
 }

@@ -1,5 +1,15 @@
 package tr
 
+import (
+	"io/ioutil"
+	"path"
+	"path/filepath"
+	"strings"
+
+	"github.com/berlingoqc/dm-backend/file"
+	"github.com/mitchellh/go-homedir"
+)
+
 // Pipeline ...
 type Pipeline struct {
 	ID   string
@@ -12,6 +22,26 @@ var Pipelines = make(map[string]Pipeline)
 
 // RegisterPipeline ...
 var RegisterPipeline = make(map[string]string)
+
+func getWorkingPath() string {
+	dir, _ := homedir.Dir()
+	return filepath.Join(dir, ".dm", "pipeline")
+}
+
+func getPipelineFilePath(id string) string {
+	return filepath.Join(getWorkingPath(), id+".json")
+}
+
+func getPipelineFile(id string) (*Pipeline, error) {
+	filepath := getPipelineFilePath(id)
+	pipeline := &Pipeline{}
+	return pipeline, file.LoadJSON(filepath, pipeline)
+}
+
+func savePipelineFile(pipeline *Pipeline) error {
+	filepath := getPipelineFilePath(pipeline.ID)
+	return file.SaveJSON(filepath, pipeline)
+}
 
 func startPipeline(id string) {
 	if pipelineName, ok := RegisterPipeline[id]; ok {
@@ -41,7 +71,7 @@ func startPipeline(id string) {
 							}
 							break LoopTask
 						case "ERROR":
-							println("ERROR RUNNING TASK ",currentNode.TaskID, " error : ",feedback.Message.(error).Error())
+							println("ERROR RUNNING TASK ", currentNode.TaskID, " error : ", feedback.Message.(error).Error())
 							break LoopNode
 						}
 					}
@@ -55,4 +85,22 @@ func startPipeline(id string) {
 		println("REGISTER PIPELINE NOT FOUND ", id)
 	}
 
+}
+
+func init() {
+	// Loading pipeline
+	folderPath := getWorkingPath()
+	files, err := ioutil.ReadDir(folderPath)
+	if err != nil {
+		panic(err)
+	}
+	for _, f := range files {
+		println("Loading pipeline ", f.Name())
+		id := strings.TrimSuffix(f.Name(), path.Ext(f.Name()))
+		pipeline, err := getPipelineFile(id)
+		if err != nil {
+			panic(err)
+		}
+		Pipelines[id] = *pipeline
+	}
 }

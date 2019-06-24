@@ -1,16 +1,15 @@
 package dm
 
 import (
-	"errors"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/berlingoqc/dm-backend/file"
+	"github.com/berlingoqc/dm-backend/program"
 	"github.com/berlingoqc/dm-backend/rpcproxy"
 	"github.com/berlingoqc/dm-backend/tr"
 	"github.com/berlingoqc/dm-backend/webserver"
-	"github.com/berlingoqc/dm-backend/program"
 
 	"github.com/gorilla/mux"
 
@@ -24,10 +23,8 @@ import (
 type Config struct {
 	URL     string                                  `json:"url"`
 	Handler map[string]*rpcproxy.RPCHandlerEndpoint `json:"handler"`
-	Program map[string]*program.Settings `json:"program"`
+	Program map[string]*program.Settings            `json:"program"`
 }
-
-
 
 // Load ...
 func Load(filepath string) (*webserver.WebServer, error) {
@@ -62,32 +59,8 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	// Ajout le hander local avec la reflexion sur les existants
 	rpcproxy.RegisterLocalHandler("dm", localHandler)
 
-	//rpcproxy.Handlers["dm"] = localHandler
-
 	r := mux.NewRouter()
 	rpcproxy.Register(r)
-
-	tr.Pipelines["cpMovie"] = tr.Pipeline{
-		ID:   "cpMovie",
-		Name: "cpMovie",
-		Node: tr.TaskNode{
-			TaskID: "CPP",
-			Params: map[string]interface{}{
-				"destination": "/home/wq/Project/dm/",
-			},
-			NextNode: []tr.TaskNode{
-				tr.TaskNode{
-					TaskID: "ZIP",
-					Params: map[string]interface{}{
-						"destination": "/home/wq/Project/dm/d",
-						"methode":     "unzip",
-					},
-				},
-			},
-		},
-	}
-
-	tr.RegisterPipeline["/var/share/Download//d.zip"] = "cpMovie"
 
 	return &webserver.WebServer{
 		Logger:      log.New(os.Stdout, "", 0),
