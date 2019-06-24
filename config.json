@@ -5,5 +5,10 @@
       "namespace": "aria2",
       "url": "localhost:6800"
     }
+  },
+  "program": {
+    "aria2": {
+      "mode": "NORUNNER"
+    }
   }
 }

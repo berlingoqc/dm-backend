@@ -10,6 +10,7 @@ import (
 	"github.com/berlingoqc/dm-backend/rpcproxy"
 	"github.com/berlingoqc/dm-backend/tr"
 	"github.com/berlingoqc/dm-backend/webserver"
+	"github.com/berlingoqc/dm-backend/program"
 
 	"github.com/gorilla/mux"
 
@@ -23,15 +24,10 @@ import (
 type Config struct {
 	URL     string                                  `json:"url"`
 	Handler map[string]*rpcproxy.RPCHandlerEndpoint `json:"handler"`
+	Program map[string]*program.Settings `json:"program"`
 }
 
-// RPCMethod ...
-type RPCMethod struct{}
 
-// Hello ...
-func (r *RPCMethod) Hello(world string) (string, error) {
-	return "Hello " + world, errors.New("CCA")
-}
 
 // Load ...
 func Load(filepath string) (*webserver.WebServer, error) {
@@ -60,10 +56,10 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	localHandler := &rpcproxy.LocalHandler{
 		Handlers: make(map[string]interface{}),
 	}
-	localHandler.Handlers["test"] = &RPCMethod{}
 	localHandler.Handlers["task"] = &tr.RPCTask{}
 	localHandler.Handlers["pipeline"] = &tr.RPCPipeline{}
 
+	// Ajout le hander local avec la reflexion sur les existants
 	rpcproxy.RegisterLocalHandler("dm", localHandler)
 
 	//rpcproxy.Handlers["dm"] = localHandler
