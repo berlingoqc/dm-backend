@@ -32,6 +32,11 @@ func (r *RPCPipeline) GetRegister() map[string]string {
 	return RegisterPipeline
 }
 
+// GetActive ...
+func (r *RPCPipeline) GetActive() map[string]*ActivePipelineStatus {
+	return ActivePipeline
+}
+
 // Register ...
 func (r *RPCPipeline) Register(handler, pipeline string, data []interface{}) {
 	if handler, ok := Handlers[handler]; ok {

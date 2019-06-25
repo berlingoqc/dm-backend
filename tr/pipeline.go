@@ -74,12 +74,20 @@ func savePipelineFile(pipeline *Pipeline) error {
 	return file.SaveJSON(filepath, pipeline)
 }
 
+func registerToActivePipeline(idRegister string, pipelineName string) *ActivePipelineStatus {
+	// Delete from register pipeline
+	delete(RegisterPipeline, idRegister)
+	// Cree la nouvelle pipeline active
+	status := &ActivePipelineStatus{Pipeline: pipelineName, State: PipelineRunning, TaskResult: make(map[string]interface{})}
+	ActivePipeline[pipelineName] = status
+	return status
+}
+
 func startPipeline(id string) {
 	if pipelineName, ok := RegisterPipeline[id]; ok {
 		if pipeline, ok := Pipelines[pipelineName]; ok {
-			delete(RegisterPipeline, id)
-			status := &ActivePipelineStatus{Pipeline: pipelineName, State: PipelineRunning, TaskResult: make(map[string]interface{})}
-			ActivePipeline[pipelineName] = status
+			status := registerToActivePipeline(id, pipelineName)
+
 			currentNode := pipeline.Node
 			chTasks := make(chan TaskFeedBack)
 		LoopNode:
