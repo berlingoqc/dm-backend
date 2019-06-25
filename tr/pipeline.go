@@ -10,18 +10,49 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-// Pipeline ...
+// PipelineState ...
+type PipelineState string
+
+const (
+	// PipelineRunning ...
+	PipelineRunning PipelineState = "running"
+	// PipelineCancel ...
+	PipelineCancel PipelineState = "cancel"
+	// PipelinePaused ...
+	PipelinePaused PipelineState = "paused"
+	// PipelineOver ...
+	PipelineOver PipelineState = "over"
+)
+
+var (
+	// MaximalPipelineRunning is the number of pipeline that can run at the same time
+	MaximalPipelineRunning = 3
+)
+
+// ActivePipelineStatus ...
+type ActivePipelineStatus struct {
+	Pipeline   string
+	State      PipelineState
+	ActiveTask []string
+	TaskResult map[string]interface{}
+}
+
+// Pipeline is a definition of task to execute on a file
 type Pipeline struct {
 	ID   string
 	Name string
 	Node TaskNode
 }
 
-// Pipelines ...
+// Pipelines contains all the available pipeline
 var Pipelines = make(map[string]Pipeline)
 
-// RegisterPipeline ...
+// RegisterPipeline contains the pipeline that are register
+// and waiting a download before to be started
 var RegisterPipeline = make(map[string]string)
+
+// ActivePipeline contains the pipeline that are currently running
+var ActivePipeline = make(map[string]*ActivePipelineStatus)
 
 func getWorkingPath() string {
 	dir, _ := homedir.Dir()
@@ -46,6 +77,9 @@ func savePipelineFile(pipeline *Pipeline) error {
 func startPipeline(id string) {
 	if pipelineName, ok := RegisterPipeline[id]; ok {
 		if pipeline, ok := Pipelines[pipelineName]; ok {
+			delete(RegisterPipeline, id)
+			status := &ActivePipelineStatus{Pipeline: pipelineName, State: PipelineRunning, TaskResult: make(map[string]interface{})}
+			ActivePipeline[pipelineName] = status
 			currentNode := pipeline.Node
 			chTasks := make(chan TaskFeedBack)
 		LoopNode:
@@ -56,6 +90,7 @@ func startPipeline(id string) {
 					println("ERROR TASK NON TROUVER")
 					break LoopNode
 				}
+				status.ActiveTask = append(status.ActiveTask, task.GetID())
 				go task.Execute(id, currentNode.Params, chTasks)
 			LoopTask:
 				for {
