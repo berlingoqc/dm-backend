@@ -1,4 +1,4 @@
-package tr
+package pipeline
 
 // IFileHandler ...
 type IFileHandler interface {

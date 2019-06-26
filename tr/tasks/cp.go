@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/berlingoqc/dm-backend/file"
-	"github.com/berlingoqc/dm-backend/tr"
+	"github.com/berlingoqc/dm-backend/tr/task"
 )
 
 // CPTask ...
@@ -13,7 +13,7 @@ type CPTask struct {
 }
 
 // Get ...
-func (c *CPTask) Get() tr.ITask {
+func (c *CPTask) Get() task.ITask {
 	return &CPTask{}
 }
 
@@ -23,12 +23,12 @@ func (c *CPTask) GetID() string {
 }
 
 // GetInfo ...
-func (c *CPTask) GetInfo() tr.TaskInfo {
-	return tr.TaskInfo{
+func (c *CPTask) GetInfo() task.TaskInfo {
+	return task.TaskInfo{
 		Name:        "copy",
 		Description: "Copy file to another location , work on file and directory",
-		Params: []tr.Params{
-			tr.Params{
+		Params: []task.Params{
+			task.Params{
 				Name:        "destination",
 				Type:        "string",
 				Optional:    false,
@@ -39,9 +39,9 @@ func (c *CPTask) GetInfo() tr.TaskInfo {
 }
 
 // Execute ...
-func (c *CPTask) Execute(fp string, params map[string]interface{}, channel chan tr.TaskFeedBack) {
+func (c *CPTask) Execute(fp string, params map[string]interface{}, channel chan task.TaskFeedBack) {
 	var err error
-	defer tr.SendError(channel, err)
+	defer task.SendError(channel, err)
 	c.destination = params["destination"].(string)
 	println("CP : copying ", fp, " TO ", c.destination)
 
@@ -52,8 +52,7 @@ func (c *CPTask) Execute(fp string, params map[string]interface{}, channel chan 
 	if err = file.Copy(fp, c.destination); err != nil {
 		return
 	}
-	tr.SendDone(channel, tr.TaskOver{
+	task.SendDone(channel, task.TaskOver{
 		Files: []string{c.destination},
 	})
-
 }

@@ -2,7 +2,7 @@ package aria2
 
 import (
 	"github.com/berlingoqc/dm-backend/rpcproxy"
-	"github.com/berlingoqc/dm-backend/tr"
+	"github.com/berlingoqc/dm-backend/tr/pipeline"
 )
 
 // RPCHandler ...
@@ -27,5 +27,5 @@ func (a *RPCHandler) Handle(body []byte) ([]byte, error) {
 
 func init() {
 	rpcproxy.Handlers["aria2"] = &RPCHandler{}
-	tr.Handlers["aria2"] = &FileHandler{}
+	pipeline.Handlers["aria2"] = &FileHandler{}
 }

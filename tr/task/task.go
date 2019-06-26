@@ -1,4 +1,4 @@
-package tr
+package task
 
 // Params ...
 type Params struct {

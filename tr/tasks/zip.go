@@ -2,7 +2,7 @@ package tasks
 
 import (
 	"github.com/berlingoqc/dm-backend/file"
-	"github.com/berlingoqc/dm-backend/tr"
+	"github.com/berlingoqc/dm-backend/tr/task"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -17,7 +17,7 @@ type ZipTask struct {
 }
 
 // Get ...
-func (c *ZipTask) Get() tr.ITask {
+func (c *ZipTask) Get() task.ITask {
 	return &ZipTask{}
 }
 
@@ -27,18 +27,18 @@ func (c *ZipTask) GetID() string {
 }
 
 // GetInfo ...
-func (c *ZipTask) GetInfo() tr.TaskInfo {
-	return tr.TaskInfo{
+func (c *ZipTask) GetInfo() task.TaskInfo {
+	return task.TaskInfo{
 		Name:        "zip",
 		Description: "Unzip the archive to a directory",
-		Params: []tr.Params{
-			tr.Params{
+		Params: []task.Params{
+			task.Params{
 				Name:        "methode",
 				Type:        "string",
 				Optional:    false,
 				Description: "zip or unzip",
 			},
-			tr.Params{
+			task.Params{
 				Name:        "destination",
 				Type:        "string",
 				Optional:    false,
@@ -49,9 +49,9 @@ func (c *ZipTask) GetInfo() tr.TaskInfo {
 }
 
 // Execute ...
-func (c *ZipTask) Execute(filepath string, params map[string]interface{}, channel chan tr.TaskFeedBack) {
+func (c *ZipTask) Execute(filepath string, params map[string]interface{}, channel chan task.TaskFeedBack) {
 	var err error
-	defer tr.SendError(channel, err)
+	defer task.SendError(channel, err)
 	zipParam := ZipParams{}
 	if err = mapstructure.Decode(params, &zipParam); err != nil {
 		return
@@ -66,7 +66,7 @@ func (c *ZipTask) Execute(filepath string, params map[string]interface{}, channe
 		}
 	}
 
-	tr.SendDone(channel, tr.TaskOver{
+	task.SendDone(channel, task.TaskOver{
 		Files: []string{zipParam.Destination},
 	})
 }

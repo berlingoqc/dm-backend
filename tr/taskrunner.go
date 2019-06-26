@@ -1,5 +1,7 @@
 package tr
 
+import "github.com/berlingoqc/dm-backend/tr/pipeline"
+
 // TriggerEvent ...
 type TriggerEvent struct {
 	Event string
@@ -14,7 +16,7 @@ func fileHandlerMainLoop() {
 		select {
 		case trigger := <-TriggerEventChannel:
 			println("EVENT ", trigger.Event, " for file ", trigger.File)
-			go startPipeline(trigger.File)
+			go pipeline.Start(trigger.File)
 		}
 	}
 

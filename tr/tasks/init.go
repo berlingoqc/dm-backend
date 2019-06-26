@@ -1,8 +1,8 @@
 package tasks
 
-import "github.com/berlingoqc/dm-backend/tr"
+import "github.com/berlingoqc/dm-backend/tr/task"
 
 func init() {
-	tr.RegisterTask(&CPTask{})
-	tr.RegisterTask(&ZipTask{})
+	task.RegisterTask(&CPTask{})
+	task.RegisterTask(&ZipTask{})
 }

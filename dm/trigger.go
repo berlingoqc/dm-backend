@@ -5,6 +5,7 @@ import (
 
 	"github.com/berlingoqc/dm-backend/rpcproxy"
 	"github.com/berlingoqc/dm-backend/tr"
+	"github.com/berlingoqc/dm-backend/tr/pipeline"
 )
 
 // DownloadEvent ...
@@ -23,7 +24,7 @@ func messageTrapper(msg rpcproxy.WSMessage) {
 		println("FAILED to unmarshall RPCCALL event ", err.Error())
 	}
 
-	if fileHandler, ok := tr.Handlers[msg.Namespace]; ok {
+	if fileHandler, ok := pipeline.Handlers[msg.Namespace]; ok {
 		if event := fileHandler.GetEvent(rpcCall.Method); event != "" {
 			if event == string(OnDownloadOver) {
 				println("DOWNLOAD IS OVER")

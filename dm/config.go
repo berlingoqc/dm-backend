@@ -8,7 +8,6 @@ import (
 	"github.com/berlingoqc/dm-backend/file"
 	"github.com/berlingoqc/dm-backend/program"
 	"github.com/berlingoqc/dm-backend/rpcproxy"
-	"github.com/berlingoqc/dm-backend/tr"
 	"github.com/berlingoqc/dm-backend/webserver"
 
 	"github.com/gorilla/mux"
@@ -16,6 +15,8 @@ import (
 	// load le module
 	_ "github.com/berlingoqc/dm-backend/aria2"
 	// load les tasks de base
+	"github.com/berlingoqc/dm-backend/tr/pipeline"
+	"github.com/berlingoqc/dm-backend/tr/task"
 	_ "github.com/berlingoqc/dm-backend/tr/tasks"
 )
 
@@ -45,7 +46,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 			// Demarre le client websocket pour le handler
 			rpcproxy.StartWebSocketClient(*handler.GetConfig())
 		}
-		if handler, ok := tr.Handlers[k]; ok {
+		if handler, ok := pipeline.Handlers[k]; ok {
 			handler.SetConfig(i)
 		}
 	}
@@ -53,8 +54,8 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	localHandler := &rpcproxy.LocalHandler{
 		Handlers: make(map[string]interface{}),
 	}
-	localHandler.Handlers["task"] = &tr.RPCTask{}
-	localHandler.Handlers["pipeline"] = &tr.RPCPipeline{}
+	localHandler.Handlers["task"] = &task.RPCTask{}
+	localHandler.Handlers["pipeline"] = &pipeline.RPCPipeline{}
 
 	// Ajout le hander local avec la reflexion sur les existants
 	rpcproxy.RegisterLocalHandler("dm", localHandler)

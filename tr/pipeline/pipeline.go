@@ -1,12 +1,14 @@
-package tr
+package pipeline
 
 import (
+	"errors"
 	"io/ioutil"
 	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/berlingoqc/dm-backend/file"
+	"github.com/berlingoqc/dm-backend/tr/task"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -41,7 +43,7 @@ type ActivePipelineStatus struct {
 type Pipeline struct {
 	ID   string
 	Name string
-	Node TaskNode
+	Node task.TaskNode
 }
 
 // Pipelines contains all the available pipeline
@@ -74,6 +76,7 @@ func savePipelineFile(pipeline *Pipeline) error {
 	return file.SaveJSON(filepath, pipeline)
 }
 
+// remove from RegisterPipeline and add to ActivePipeline
 func registerToActivePipeline(idRegister string, pipelineName string) *ActivePipelineStatus {
 	// Delete from register pipeline
 	delete(RegisterPipeline, idRegister)
@@ -83,51 +86,53 @@ func registerToActivePipeline(idRegister string, pipelineName string) *ActivePip
 	return status
 }
 
-func startPipeline(id string) {
-	if pipelineName, ok := RegisterPipeline[id]; ok {
-		if pipeline, ok := Pipelines[pipelineName]; ok {
-			status := registerToActivePipeline(id, pipelineName)
+func startPipeline(id string, pipeline *Pipeline) {
+	status := registerToActivePipeline(id, pipeline.Name)
 
-			currentNode := pipeline.Node
-			chTasks := make(chan TaskFeedBack)
-		LoopNode:
-			for {
-				println("STARTING TASK ID ", currentNode.TaskID)
-				task := GetTask(currentNode.TaskID)
-				if task == nil {
-					println("ERROR TASK NON TROUVER")
+	currentNode := pipeline.Node
+	chTasks := make(chan task.TaskFeedBack)
+LoopNode:
+	for {
+		println("STARTING TASK ID ", currentNode.TaskID)
+		task := task.GetTask(currentNode.TaskID)
+		if task == nil {
+			println("ERROR TASK NON TROUVER")
+			break LoopNode
+		}
+		status.ActiveTask = append(status.ActiveTask, task.GetID())
+		go task.Execute(id, currentNode.Params, chTasks)
+	LoopTask:
+		for {
+			select {
+			case feedback := <-chTasks:
+				switch feedback.Event {
+				case "DONE":
+					println("Task done passing to next")
+					if len(currentNode.NextNode) == 0 {
+						break LoopNode
+					} else {
+						currentNode = currentNode.NextNode[0]
+					}
+					break LoopTask
+				case "ERROR":
+					println("ERROR RUNNING TASK ", currentNode.TaskID, " error : ", feedback.Message.(error).Error())
 					break LoopNode
 				}
-				status.ActiveTask = append(status.ActiveTask, task.GetID())
-				go task.Execute(id, currentNode.Params, chTasks)
-			LoopTask:
-				for {
-					select {
-					case feedback := <-chTasks:
-						switch feedback.Event {
-						case "DONE":
-							println("Task done passing to next")
-							if len(currentNode.NextNode) == 0 {
-								break LoopNode
-							} else {
-								currentNode = currentNode.NextNode[0]
-							}
-							break LoopTask
-						case "ERROR":
-							println("ERROR RUNNING TASK ", currentNode.TaskID, " error : ", feedback.Message.(error).Error())
-							break LoopNode
-						}
-					}
-				}
 			}
-			println("FIN DE LA PIPEPINE ", id)
-		} else {
-			println("PIPELINE NOT FOUND")
 		}
-	} else {
-		println("REGISTER PIPELINE NOT FOUND ", id)
 	}
+	println("FIN DE LA PIPEPINE ", id)
+}
 
+// Start ...
+func Start(id string) error {
+	if pipelineName, ok := RegisterPipeline[id]; ok {
+		if pipeline, ok := Pipelines[pipelineName]; ok {
+			startPipeline(id, &pipeline)
+		}
+		return errors.New("Pipeline not found " + pipelineName)
+	}
+	return errors.New("RegisterPipeline not found " + id)
 }
 
 func init() {
