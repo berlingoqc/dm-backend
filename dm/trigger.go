@@ -1,8 +1,6 @@
 package dm
 
 import (
-	"encoding/json"
-
 	"github.com/berlingoqc/dm-backend/rpcproxy"
 	"github.com/berlingoqc/dm-backend/tr"
 	"github.com/berlingoqc/dm-backend/tr/pipeline"
@@ -19,10 +17,7 @@ const (
 )
 
 func messageTrapper(msg rpcproxy.WSMessage) {
-	rpcCall := rpcproxy.RPCCall{}
-	if err := json.Unmarshal(msg.Data, &rpcCall); err != nil {
-		println("FAILED to unmarshall RPCCALL event ", err.Error())
-	}
+	rpcCall := msg.Data
 
 	if fileHandler, ok := pipeline.Handlers[msg.Namespace]; ok {
 		if event := fileHandler.GetEvent(rpcCall.Method); event != "" {

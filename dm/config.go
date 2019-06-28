@@ -61,7 +61,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	rpcproxy.RegisterLocalHandler("dm", localHandler)
 
 	r := mux.NewRouter()
-	rpcproxy.Register(r)
+	handler := rpcproxy.Register(r)
 
 	return &webserver.WebServer{
 		Logger:      log.New(os.Stdout, "", 0),
@@ -69,7 +69,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 		ChannelStop: make(chan os.Signal, 1),
 		Hs: &http.Server{
 			Addr:    config.URL,
-			Handler: r,
+			Handler: handler,
 		},
 	}, nil
 }

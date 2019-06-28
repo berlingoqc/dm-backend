@@ -1,6 +1,7 @@
 package rpcproxy
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 
@@ -9,8 +10,8 @@ import (
 
 // WSMessage ...
 type WSMessage struct {
-	Namespace string
-	Data      []byte
+	Namespace string  `json:"domain"`
+	Data      RPCCall `json:"data"`
 }
 
 // WSMessageTrapper ...
@@ -31,6 +32,7 @@ func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	clients = append(clients, c)
+	c.WriteJSON(WSMessage{Data: RPCCall{}})
 }
 
 func clientMessageHandler() {
@@ -64,18 +66,24 @@ func StartWebSocketClient(info RPCHandlerEndpoint) {
 	}
 
 	go func() {
-		defer c.Close()
+		defer func() {
+			println("DEFFFERRRING")
+			c.Close()
+		}()
 		for {
 			_, msg, err := c.ReadMessage()
 			if err != nil {
 				println("ERROR reading ", err.Error())
 				return
 			}
-			println(string(msg))
+			rpcCall := RPCCall{}
+			if err := json.Unmarshal(msg, &rpcCall); err != nil {
+				println("FAILED to unmarshall RPCCALL event ", err.Error())
+			}
 
 			clientMessageChannel <- WSMessage{
 				Namespace: info.Namespace,
-				Data:      msg,
+				Data:      rpcCall,
 			}
 		}
 	}()

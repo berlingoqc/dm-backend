@@ -11,6 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/mitchellh/mapstructure"
+	"github.com/rs/cors"
 )
 
 // Handlers ...
@@ -18,6 +19,7 @@ var Handlers = make(map[string]RPCHandler)
 
 // handleRPCProxy ...
 func handleRPCProxy(w http.ResponseWriter, r *http.Request) {
+	addCors(w)
 	var err error
 	defer func() {
 		if err != nil {
@@ -27,7 +29,6 @@ func handleRPCProxy(w http.ResponseWriter, r *http.Request) {
 	}()
 	if da := r.Header.Get("X-dm-namespace"); da != "" {
 		if handler, ok := Handlers[da]; ok {
-			println("Proxing for ", da)
 			reader := r.Body
 			var body []byte
 			body, err = ioutil.ReadAll(reader)
@@ -88,7 +89,7 @@ func RPCRequest(host string, call RPCCall, result interface{}) error {
 }
 
 // Register this
-func Register(mux *mux.Router) {
+func Register(mux *mux.Router) http.Handler {
 	mux.Path("/jsonrpc").Methods("POST").HandlerFunc(handleRPCProxy)
 	mux.Path("/jsonrpc").Methods("GET").HandlerFunc(handleWebSocket)
 
@@ -114,4 +115,6 @@ func Register(mux *mux.Router) {
 	for k := range Handlers {
 		s.Namesapce = append(s.Namesapce, k)
 	}
+
+	return cors.Default().Handler(mux)
 }

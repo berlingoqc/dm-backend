@@ -26,6 +26,21 @@ const (
 	PipelineOver PipelineState = "over"
 )
 
+const (
+	// OnPipelineStart ...
+	OnPipelineStart = "onPipelineStart"
+	// OnPipelineEnd ...
+	OnPipelineEnd = "onPipelineEnd"
+	// OnPipelineError ...
+	OnPipelineError = "onPipelineError"
+	// OnTaskStart ...
+	OnTaskStart = "onTaskStart"
+	// OnTaskEnd ...
+	OnTaskEnd = "onTaskEnd"
+	// OnTaskError ...
+	OnTaskError = "onTaskError"
+)
+
 var (
 	// MaximalPipelineRunning is the number of pipeline that can run at the same time
 	MaximalPipelineRunning = 3
@@ -33,17 +48,17 @@ var (
 
 // ActivePipelineStatus ...
 type ActivePipelineStatus struct {
-	Pipeline   string
-	State      PipelineState
-	ActiveTask []string
-	TaskResult map[string]interface{}
+	Pipeline   string                 `json:"pipeline"`
+	State      PipelineState          `json:"state"`
+	ActiveTask []string               `json:"activetask"`
+	TaskResult map[string]interface{} `json:"tasresult"`
 }
 
 // Pipeline is a definition of task to execute on a file
 type Pipeline struct {
-	ID   string
-	Name string
-	Node task.TaskNode
+	ID   string        `json:"id"`
+	Name string        `json:"name"`
+	Node task.TaskNode `json:"node"`
 }
 
 // Pipelines contains all the available pipeline
