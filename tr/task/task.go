@@ -55,7 +55,7 @@ func GetTask(task string) ITask {
 // RegisterTask ...
 func RegisterTask(task ITask) {
 	println("Registering task ", task.GetID)
-	tasks[task.GetID()] = task
+	tasks[task.GetInfo().Name] = task
 }
 
 // SendError ...

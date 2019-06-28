@@ -25,6 +25,20 @@ var clients = make([]*websocket.Conn, 0)
 
 var clientMessageChannel = make(chan WSMessage)
 
+// SendMessageWS ...
+func SendMessageWS(domain string, namespace string, event string, data interface{}) {
+	msg := WSMessage{
+		Namespace: domain,
+		Data: RPCCall{
+			Jsonrpc: "2.0",
+			ID:      "qwer",
+			Method:  namespace + "." + event,
+			Result:  []interface{}{data},
+		},
+	}
+	clientMessageChannel <- msg
+}
+
 func handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {

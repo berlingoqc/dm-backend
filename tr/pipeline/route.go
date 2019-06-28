@@ -16,23 +16,32 @@ func (r *RPCPipeline) GetPipelines() map[string]Pipeline {
 }
 
 // GetRegister ...
-func (r *RPCPipeline) GetRegister() map[string]string {
-	return RegisterPipeline
+func (r *RPCPipeline) GetRegister() map[string]RegisterPipeline {
+	return RegisterPipelines
 }
 
 // GetActive ...
 func (r *RPCPipeline) GetActive() map[string]*ActivePipelineStatus {
-	return ActivePipeline
+	return ActivePipelines
 }
 
 // Register ...
-func (r *RPCPipeline) Register(handler, pipeline string, data []interface{}) {
-	if handler, ok := Handlers[handler]; ok {
+func (r *RPCPipeline) Register(handlerName, pipeline string, data []interface{}) {
+	if handler, ok := Handlers[handlerName]; ok {
 		filepath, err := handler.GetFilePath(data)
 		if err != nil {
 			panic(err)
 		}
-		RegisterPipeline[filepath] = pipeline
+		if filepath == "" {
+			panic("Filepath from handler " + handlerName + " is empty")
+		}
+		RegisterPipelines[filepath] = RegisterPipeline{
+			File:     filepath,
+			Pipeline: pipeline,
+			Provider: handlerName,
+			Data:     data,
+		}
+		println("Pipeline register")
 	} else {
 		panic(errors.New("Cant find handler"))
 	}
@@ -60,4 +69,9 @@ func (r *RPCPipeline) Delete(id string) {
 		panic(err)
 	}
 	delete(Pipelines, id)
+}
+
+// DeleteRegister ...
+func (r *RPCPipeline) DeleteRegister(id string) {
+	delete(RegisterPipelines, id)
 }

@@ -39,6 +39,10 @@ const (
 	OnTaskEnd = "onTaskEnd"
 	// OnTaskError ...
 	OnTaskError = "onTaskError"
+	// OnPipelineRegisterUpdate ...
+	OnPipelineRegisterUpdate = "onPipelineRegisterUpdate"
+	// OnPipelineActiveUpdate ...
+	OnPipelineActiveUpdate = "onPipelineActiveUpdate"
 )
 
 var (
@@ -52,6 +56,15 @@ type ActivePipelineStatus struct {
 	State      PipelineState          `json:"state"`
 	ActiveTask []string               `json:"activetask"`
 	TaskResult map[string]interface{} `json:"tasresult"`
+	Register   RegisterPipeline       `json:"register"`
+}
+
+// RegisterPipeline ...
+type RegisterPipeline struct {
+	File     string        `json:"file"`
+	Pipeline string        `json:"pipeline"`
+	Provider string        `json:"provider"`
+	Data     []interface{} `json:"data"`
 }
 
 // Pipeline is a definition of task to execute on a file
@@ -64,12 +77,12 @@ type Pipeline struct {
 // Pipelines contains all the available pipeline
 var Pipelines = make(map[string]Pipeline)
 
-// RegisterPipeline contains the pipeline that are register
+// RegisterPipelines contains the pipeline that are register
 // and waiting a download before to be started
-var RegisterPipeline = make(map[string]string)
+var RegisterPipelines = make(map[string]RegisterPipeline)
 
-// ActivePipeline contains the pipeline that are currently running
-var ActivePipeline = make(map[string]*ActivePipelineStatus)
+// ActivePipelines contains the pipeline that are currently running
+var ActivePipelines = make(map[string]*ActivePipelineStatus)
 
 func getWorkingPath() string {
 	dir, _ := homedir.Dir()
@@ -94,14 +107,15 @@ func savePipelineFile(pipeline *Pipeline) error {
 // remove from RegisterPipeline and add to ActivePipeline
 func registerToActivePipeline(idRegister string, pipelineName string) *ActivePipelineStatus {
 	// Delete from register pipeline
-	delete(RegisterPipeline, idRegister)
+	delete(RegisterPipelines, idRegister)
 	// Cree la nouvelle pipeline active
 	status := &ActivePipelineStatus{Pipeline: pipelineName, State: PipelineRunning, TaskResult: make(map[string]interface{})}
-	ActivePipeline[pipelineName] = status
+	ActivePipelines[pipelineName] = status
 	return status
 }
 
 func startPipeline(id string, pipeline *Pipeline) {
+	println("Starting pipeline ", id, " ", pipeline.Name)
 	status := registerToActivePipeline(id, pipeline.Name)
 
 	currentNode := pipeline.Node
@@ -141,11 +155,11 @@ LoopNode:
 
 // Start ...
 func Start(id string) error {
-	if pipelineName, ok := RegisterPipeline[id]; ok {
-		if pipeline, ok := Pipelines[pipelineName]; ok {
+	if pipelineName, ok := RegisterPipelines[id]; ok {
+		if pipeline, ok := Pipelines[pipelineName.Pipeline]; ok {
 			startPipeline(id, &pipeline)
 		}
-		return errors.New("Pipeline not found " + pipelineName)
+		return errors.New("Pipeline not found " + pipelineName.Pipeline)
 	}
 	return errors.New("RegisterPipeline not found " + id)
 }
