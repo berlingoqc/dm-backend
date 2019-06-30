@@ -54,14 +54,15 @@ func (c *ZipTask) Execute(filepath string, params map[string]interface{}, channe
 	defer task.SendError(channel, err)
 	zipParam := ZipParams{}
 	if err = mapstructure.Decode(params, &zipParam); err != nil {
+		channel <- task.TaskFeedBack{Event: task.ErrorFeedBack, Message: err}
 		return
 	}
 	switch zipParam.Methode {
 	case "zip":
-		println("NOT SUPPORTED ZIP TEY")
 	case "unzip":
 		_, err = file.Unzip(filepath, zipParam.Destination)
 		if err != nil {
+			channel <- task.TaskFeedBack{Event: task.ErrorFeedBack, Message: err}
 			return
 		}
 	}

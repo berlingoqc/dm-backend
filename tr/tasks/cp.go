@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/berlingoqc/dm-backend/file"
@@ -41,15 +42,20 @@ func (c *CPTask) GetInfo() task.TaskInfo {
 // Execute ...
 func (c *CPTask) Execute(fp string, params map[string]interface{}, channel chan task.TaskFeedBack) {
 	var err error
+	var ok bool
 	defer task.SendError(channel, err)
-	c.destination = params["destination"].(string)
-	println("CP : copying ", fp, " TO ", c.destination)
+	if c.destination, ok = params["destination"].(string); !ok {
+		channel <- task.TaskFeedBack{Event: task.ErrorFeedBack, Message: "destination param not valid"}
+	}
+	output := fmt.Sprint("CP : copying  TO ", c.destination)
+	channel <- task.TaskFeedBack{Event: task.OutFeedBack, Message: output}
 
 	// Doit ajouter le nom du fichier a la fin du path de destination pour que ca marche
 	fileName := filepath.Base(fp)
 	c.destination = filepath.Join(c.destination, fileName)
 
 	if err = file.Copy(fp, c.destination); err != nil {
+		channel <- task.TaskFeedBack{Event: task.ErrorFeedBack, Message: err}
 		return
 	}
 	task.SendDone(channel, task.TaskOver{

@@ -21,9 +21,21 @@ type TaskOver struct {
 	Files []string
 }
 
+// TypeTaskFeedBack ...
+type TypeTaskFeedBack string
+
+const (
+	// ErrorFeedBack ...
+	ErrorFeedBack TypeTaskFeedBack = "ERROR"
+	// DoneFeedBack ...
+	DoneFeedBack TypeTaskFeedBack = "DONE"
+	// OutFeedBack ...
+	OutFeedBack TypeTaskFeedBack = "OUTPUT"
+)
+
 // TaskFeedBack ...
 type TaskFeedBack struct {
-	Event   string
+	Event   TypeTaskFeedBack
 	Message interface{}
 }
 

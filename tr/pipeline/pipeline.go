@@ -12,6 +12,9 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
+// FeedBack ...
+var FeedBack func(namespace string, event string, data interface{})
+
 // PipelineState ...
 type PipelineState string
 
@@ -33,12 +36,16 @@ const (
 	OnPipelineEnd = "onPipelineEnd"
 	// OnPipelineError ...
 	OnPipelineError = "onPipelineError"
+	// OnPipelineStatusUpdate ...
+	OnPipelineStatusUpdate = "onPipelineStatusUpdate"
 	// OnTaskStart ...
 	OnTaskStart = "onTaskStart"
 	// OnTaskEnd ...
 	OnTaskEnd = "onTaskEnd"
 	// OnTaskError ...
 	OnTaskError = "onTaskError"
+	// OnTaskUpdate ...
+	OnTaskUpdate = "onTaskUpdate"
 	// OnPipelineRegisterUpdate ...
 	OnPipelineRegisterUpdate = "onPipelineRegisterUpdate"
 	// OnPipelineActiveUpdate ...
@@ -52,11 +59,11 @@ var (
 
 // ActivePipelineStatus ...
 type ActivePipelineStatus struct {
-	Pipeline   string                 `json:"pipeline"`
-	State      PipelineState          `json:"state"`
-	ActiveTask []string               `json:"activetask"`
-	TaskResult map[string]interface{} `json:"tasresult"`
-	Register   RegisterPipeline       `json:"register"`
+	Pipeline   string              `json:"pipeline"`
+	State      PipelineState       `json:"state"`
+	ActiveTask []string            `json:"activetask"`
+	TaskResult map[string][]string `json:"taskresult"`
+	Register   RegisterPipeline    `json:"register"`
 }
 
 // RegisterPipeline ...
@@ -109,48 +116,56 @@ func registerToActivePipeline(idRegister string, pipelineName string) *ActivePip
 	// Delete from register pipeline
 	delete(RegisterPipelines, idRegister)
 	// Cree la nouvelle pipeline active
-	status := &ActivePipelineStatus{Pipeline: pipelineName, State: PipelineRunning, TaskResult: make(map[string]interface{})}
+	status := &ActivePipelineStatus{Pipeline: pipelineName, State: PipelineRunning, TaskResult: make(map[string][]string)}
 	ActivePipelines[pipelineName] = status
+	FeedBack("pipeline", OnPipelineActiveUpdate, nil)
+	FeedBack("pipeline", OnPipelineRegisterUpdate, nil)
 	return status
 }
 
 func startPipeline(id string, pipeline *Pipeline) {
-	println("Starting pipeline ", id, " ", pipeline.Name)
 	status := registerToActivePipeline(id, pipeline.Name)
 
 	currentNode := pipeline.Node
 	chTasks := make(chan task.TaskFeedBack)
+	FeedBack("pipeline", OnPipelineStart, pipeline.ID)
 LoopNode:
 	for {
-		println("STARTING TASK ID ", currentNode.TaskID)
-		task := task.GetTask(currentNode.TaskID)
-		if task == nil {
-			println("ERROR TASK NON TROUVER")
+		t := task.GetTask(currentNode.TaskID)
+		if t == nil {
+			FeedBack("pipeline", OnPipelineError, "task not found")
 			break LoopNode
 		}
-		status.ActiveTask = append(status.ActiveTask, task.GetID())
-		go task.Execute(id, currentNode.Params, chTasks)
+		FeedBack("pipeline", OnTaskStart, currentNode.TaskID)
+		status.ActiveTask = append(status.ActiveTask, t.GetID())
+		go t.Execute(id, currentNode.Params, chTasks)
 	LoopTask:
 		for {
 			select {
 			case feedback := <-chTasks:
 				switch feedback.Event {
-				case "DONE":
-					println("Task done passing to next")
+				case task.DoneFeedBack:
+					FeedBack("pipeline", OnTaskEnd, currentNode.TaskID)
 					if len(currentNode.NextNode) == 0 {
 						break LoopNode
 					} else {
 						currentNode = currentNode.NextNode[0]
 					}
 					break LoopTask
-				case "ERROR":
-					println("ERROR RUNNING TASK ", currentNode.TaskID, " error : ", feedback.Message.(error).Error())
+				case task.OutFeedBack:
+					FeedBack("pipeline", OnTaskUpdate, feedback.Message)
+					status.TaskResult[t.GetID()] = append(status.TaskResult[t.GetID()], feedback.Message.(string))
+				case task.ErrorFeedBack:
+					err := feedback.Message.(error).Error()
+					FeedBack("pipeline", OnTaskError, err)
+					status.TaskResult[t.GetID()] = append(status.TaskResult[t.GetID()], err)
 					break LoopNode
 				}
 			}
 		}
 	}
-	println("FIN DE LA PIPEPINE ", id)
+	status.State = PipelineOver
+	FeedBack("pipeline", OnPipelineEnd, id)
 }
 
 // Start ...

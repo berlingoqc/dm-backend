@@ -7,6 +7,13 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// MapValueToSlice ...
+func MapValueToSlice(data map[string]interface{}, d []interface{}) {
+	for _, v := range data {
+		d = append(d, v)
+	}
+}
+
 // RPCPipeline ...
 type RPCPipeline struct{}
 
@@ -21,8 +28,12 @@ func (r *RPCPipeline) GetRegister() map[string]RegisterPipeline {
 }
 
 // GetActive ...
-func (r *RPCPipeline) GetActive() map[string]*ActivePipelineStatus {
-	return ActivePipelines
+func (r *RPCPipeline) GetActive() []*ActivePipelineStatus {
+	var a []*ActivePipelineStatus
+	for _, v := range ActivePipelines {
+		a = append(a, v)
+	}
+	return a
 }
 
 // Register ...

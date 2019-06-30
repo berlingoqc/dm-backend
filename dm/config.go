@@ -63,6 +63,11 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	// Ajout le hander local avec la reflexion sur les existants
 	rpcproxy.RegisterLocalHandler("dm", localHandler)
 
+	// Set the pipeline feedback to web socket
+	pipeline.FeedBack = func(namespace, event string, data interface{}) {
+		rpcproxy.SendMessageWS("dm", namespace, event, data)
+	}
+
 	r := mux.NewRouter()
 	handler := rpcproxy.Register(r)
 
