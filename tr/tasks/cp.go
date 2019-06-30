@@ -36,6 +36,7 @@ func (c *CPTask) GetInfo() task.TaskInfo {
 				Description: "Folder where to copy the file",
 			},
 		},
+		NumberReturn: 1,
 	}
 }
 

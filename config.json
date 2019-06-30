@@ -6,9 +6,11 @@
       "url": "localhost:6800"
     }
   },
-  "program": {
-    "aria2": {
-      "mode": "NORUNNER"
+  "program": [
+    {
+      "name": "aria2c",
+      "mode": "PATH",
+      "args": ["--conf-path=../dm/aria2/aria2.conf"]
     }
-  }
+  ]
 }

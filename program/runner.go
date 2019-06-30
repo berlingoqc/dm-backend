@@ -1,6 +1,7 @@
 package program
 
 import (
+	"errors"
 	"os/exec"
 )
 
@@ -19,7 +20,10 @@ const (
 
 // Settings ...
 type Settings struct {
-	Mode RunningMode
+	Name string                 `json:"name"`
+	Mode RunningMode            `json:"mode"`
+	Args []string               `json:"args"`
+	Env  map[string]interface{} `json:"env"`
 }
 
 // RunnerSettings ...
@@ -31,27 +35,72 @@ type RunnerSettings struct {
 type Runner struct {
 	ErrorChan chan error
 	Cmd       *exec.Cmd
+	Running   bool
 }
 
-// GetRunner ...
-func GetRunner(program string, args map[string]interface{}, env map[string]interface{}) (*Runner, error) {
+// getRunner ...
+func getRunner(program string, args []string, env map[string]interface{}) (*Runner, error) {
 	ch := make(chan error)
-	cmd := exec.Command(program)
+	cmd := exec.Command(program, args...)
 	err := cmd.Start()
 	if err != nil {
 		return nil, err
 	}
+	r := &Runner{
+		ErrorChan: ch,
+		Cmd:       cmd,
+		Running:   true,
+	}
 	go func() {
 		err := cmd.Wait()
+		r.Running = false
 		if err != nil {
-			print("Program end with error ", err.Error())
 			ch <- err
 			return
 		}
 		print("End without error")
 	}()
-	return &Runner{
-		ErrorChan: ch,
-		Cmd:       cmd,
-	}, nil
+	return r, nil
+}
+
+func programListen() {
+	for {
+		for _, v := range activeRunner {
+			select {
+			case err := <-v.ErrorChan:
+				println("RUNNER ERROR ", err.Error())
+				break
+			}
+
+		}
+	}
+
+}
+
+// GetRunner ...
+func GetRunner(s *Settings) (*Runner, error) {
+	switch s.Mode {
+	case PathRunner:
+		return getRunner(s.Name, s.Args, s.Env)
+	default:
+		return nil, errors.New("Mode not impement yet")
+	}
+}
+
+var activeRunner = make(map[string]*Runner)
+
+// Start ...
+func Start(program []*Settings) error {
+	for _, v := range program {
+		r, err := GetRunner(v)
+		if err != nil {
+			return err
+		}
+		activeRunner[v.Name] = r
+	}
+	return nil
+}
+
+func init() {
+	go programListen()
 }

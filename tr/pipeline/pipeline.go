@@ -149,7 +149,12 @@ LoopNode:
 					if len(currentNode.NextNode) == 0 {
 						break LoopNode
 					} else {
-						currentNode = currentNode.NextNode[0]
+						if over, ok := feedback.Message.(task.TaskOver); ok && len(over.Files) > 0 {
+							id = over.Files[0]
+							currentNode = currentNode.NextNode[0]
+						} else {
+							FeedBack("pipeline", OnPipelineError, "could not get information to start next task")
+						}
 					}
 					break LoopTask
 				case task.OutFeedBack:

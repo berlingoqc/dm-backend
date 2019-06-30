@@ -26,7 +26,7 @@ import (
 type Config struct {
 	URL     string                                  `json:"url"`
 	Handler map[string]*rpcproxy.RPCHandlerEndpoint `json:"handler"`
-	Program map[string]*program.Settings            `json:"program"`
+	Program []*program.Settings                     `json:"program"`
 }
 
 // Load ...
@@ -36,6 +36,9 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	if err := file.LoadJSON(filepath, config); err != nil {
 		return nil, err
 	}
+
+	// Demarre ou pas les programmes
+	program.Start(config.Program)
 
 	// Configure la fonction d'handle des messages websocket
 	rpcproxy.WSMessageTrapper = messageTrapper
