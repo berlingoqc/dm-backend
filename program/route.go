@@ -10,8 +10,7 @@ type RunnerInfo struct {
 	OutputBuffer string `json:"outputbuffer"`
 	ErrorBuffer  string `json:"errorbuffer"`
 
-	Cmd      *exec.Cmd `json:"cmd"`
-	Settings Settings  `json:"settings"`
+	Cmd *exec.Cmd `json:"cmd"`
 }
 
 // RPC ...
@@ -35,4 +34,25 @@ func (r *RPC) GetActiveRunner() []RunnerInfo {
 		infos = append(infos, r)
 	}
 	return infos
+}
+
+// StartRunner ...
+func (r *RPC) StartRunner(name string) string {
+	if set, ok := settingsRunner[name]; ok {
+		delete(activeRunner, name)
+		if err := Start([]*Settings{set}); err != nil {
+			panic(err)
+		}
+	}
+	return "OK"
+}
+
+// StopRunner ...
+func (r *RPC) StopRunner(name string) string {
+	if r, ok := activeRunner[name]; ok {
+		if err := r.Cmd.Process.Kill(); err != nil {
+			panic(err)
+		}
+	}
+	return "OK"
 }

@@ -43,6 +43,9 @@ type Runner struct {
 	STDErr bytes.Buffer
 }
 
+var activeRunner = make(map[string]*Runner)
+var settingsRunner = make(map[string]*Settings)
+
 // getRunner ...
 func getRunner(program string, args []string, env map[string]interface{}) (*Runner, error) {
 	ch := make(chan error)
@@ -67,7 +70,6 @@ func getRunner(program string, args []string, env map[string]interface{}) (*Runn
 			ch <- err
 			return
 		}
-		print("End without error")
 	}()
 	return r, nil
 }
@@ -96,8 +98,6 @@ func GetRunner(s *Settings) (*Runner, error) {
 	}
 }
 
-var activeRunner = make(map[string]*Runner)
-
 // Start ...
 func Start(program []*Settings) error {
 	for _, v := range program {
@@ -105,6 +105,7 @@ func Start(program []*Settings) error {
 		if err != nil {
 			return err
 		}
+		settingsRunner[v.Name] = v
 		activeRunner[v.Name] = r
 	}
 	return nil
