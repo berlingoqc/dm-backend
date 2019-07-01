@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/berlingoqc/dm-backend/file"
 	"github.com/berlingoqc/dm-backend/program"
@@ -40,6 +41,9 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	// Demarre ou pas les programmes
 	program.Start(config.Program)
 
+	// WAIT TEMPORAIRE
+	time.Sleep(1 * time.Second)
+
 	// Configure la fonction d'handle des messages websocket
 	rpcproxy.WSMessageTrapper = messageTrapper
 
@@ -62,6 +66,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	localHandler.Handlers["task"] = &task.RPCTask{}
 	localHandler.Handlers["pipeline"] = &pipeline.RPCPipeline{}
 	localHandler.Handlers["tr"] = &tr.RPC{}
+	localHandler.Handlers["program"] = &program.RPC{}
 
 	// Ajout le hander local avec la reflexion sur les existants
 	rpcproxy.RegisterLocalHandler("dm", localHandler)

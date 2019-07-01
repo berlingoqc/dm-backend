@@ -1,6 +1,7 @@
 package program
 
 import (
+	"bytes"
 	"errors"
 	"os/exec"
 )
@@ -36,25 +37,33 @@ type Runner struct {
 	ErrorChan chan error
 	Cmd       *exec.Cmd
 	Running   bool
+	Error     error
+
+	STDOut bytes.Buffer
+	STDErr bytes.Buffer
 }
 
 // getRunner ...
 func getRunner(program string, args []string, env map[string]interface{}) (*Runner, error) {
 	ch := make(chan error)
 	cmd := exec.Command(program, args...)
-	err := cmd.Start()
-	if err != nil {
-		return nil, err
-	}
 	r := &Runner{
 		ErrorChan: ch,
 		Cmd:       cmd,
 		Running:   true,
 	}
+	cmd.Stdout = &r.STDOut
+	cmd.Stderr = &r.STDErr
+	err := cmd.Start()
+	if err != nil {
+		return nil, err
+	}
+
 	go func() {
 		err := cmd.Wait()
 		r.Running = false
 		if err != nil {
+			r.Error = err
 			ch <- err
 			return
 		}

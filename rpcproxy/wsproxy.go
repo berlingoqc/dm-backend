@@ -82,9 +82,11 @@ func StartWebSocketClient(info RPCHandlerEndpoint) {
 	go func() {
 		defer func() {
 			println("DEFFFERRRING")
-			c.Close()
 		}()
 		for {
+			if c == nil {
+				return
+			}
 			_, msg, err := c.ReadMessage()
 			if err != nil {
 				println("ERROR reading ", err.Error())
