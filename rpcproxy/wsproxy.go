@@ -8,6 +8,13 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const (
+	// OnConnectionLost ...
+	OnConnectionLost = "onConnectionLost"
+	// OnConnectionStart ...
+	OnConnectionStart = "onConnectionStart"
+)
+
 // WSMessage ...
 type WSMessage struct {
 	Namespace string  `json:"domain"`
@@ -73,7 +80,7 @@ type ActiveWSClient struct {
 	Endpoint  RPCHandlerEndpoint `json:"endpoint"`
 	Connected bool               `json:"connected"`
 	Error     string             `json:"error"`
-	Conn      *websocket.Conn
+	Conn      *websocket.Conn    `json:"-"`
 }
 
 var activeClient = make(map[string]*ActiveWSClient)
