@@ -14,6 +14,7 @@ type RPCCall struct {
 type RPCHandlerEndpoint struct {
 	Namespace string `json:"namespace"`
 	URL       string `json:"url"`
+	URLWS     string `json:"urlws"`
 }
 
 // RPCHandler ...

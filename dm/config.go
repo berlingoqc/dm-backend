@@ -16,6 +16,8 @@ import (
 
 	// load le module
 	_ "github.com/berlingoqc/dm-backend/aria2"
+	_ "github.com/berlingoqc/dm-backend/ydl"
+
 	"github.com/berlingoqc/dm-backend/tr/pipeline"
 	"github.com/berlingoqc/dm-backend/tr/task"
 
@@ -54,6 +56,8 @@ func Load(filepath string) (*webserver.WebServer, error) {
 			handler.SetConfig(i)
 			// Demarre le client websocket pour le handler
 			rpcproxy.StartWebSocketClient(*handler.GetConfig())
+		} else {
+			println("Could not found handler ", k)
 		}
 		if handler, ok := pipeline.Handlers[k]; ok {
 			handler.SetConfig(i)

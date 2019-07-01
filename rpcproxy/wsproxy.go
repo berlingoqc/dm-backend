@@ -92,7 +92,11 @@ func StartWebSocketClient(info RPCHandlerEndpoint) error {
 		Connected: false,
 	}
 	activeClient[info.Namespace] = clientInfo
-	u := url.URL{Scheme: "ws", Host: info.URL, Path: "/jsonrpc"}
+	urlws := info.URLWS
+	if urlws == "" {
+		urlws = info.URL
+	}
+	u := url.URL{Scheme: "ws", Host: urlws, Path: "/jsonrpc"}
 
 	println("connecting to ", u.String())
 
