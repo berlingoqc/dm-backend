@@ -68,8 +68,23 @@ func clientMessageHandler() {
 	}
 }
 
+// ActiveWSClient ...
+type ActiveWSClient struct {
+	Endpoint  RPCHandlerEndpoint `json:"endpoint"`
+	Connected bool               `json:"connected"`
+	Error     string             `json:"error"`
+	Conn      *websocket.Conn
+}
+
+var activeClient = make(map[string]*ActiveWSClient)
+
 // StartWebSocketClient ...
-func StartWebSocketClient(info RPCHandlerEndpoint) {
+func StartWebSocketClient(info RPCHandlerEndpoint) error {
+	clientInfo := &ActiveWSClient{
+		Endpoint:  info,
+		Connected: false,
+	}
+	activeClient[info.Namespace] = clientInfo
 	u := url.URL{Scheme: "ws", Host: info.URL, Path: "/jsonrpc"}
 
 	println("connecting to ", u.String())
@@ -77,11 +92,16 @@ func StartWebSocketClient(info RPCHandlerEndpoint) {
 	c, _, err := websocket.DefaultDialer.Dial(u.String(), nil)
 	if err != nil {
 		println("ERROR connecting ws ", err.Error())
+		clientInfo.Error = err.Error()
+		return err
 	}
+
+	clientInfo.Connected = true
+	clientInfo.Conn = c
 
 	go func() {
 		defer func() {
-			println("DEFFFERRRING")
+			clientInfo.Connected = false
 		}()
 		for {
 			if c == nil {
@@ -89,7 +109,7 @@ func StartWebSocketClient(info RPCHandlerEndpoint) {
 			}
 			_, msg, err := c.ReadMessage()
 			if err != nil {
-				println("ERROR reading ", err.Error())
+				clientInfo.Error = err.Error()
 				return
 			}
 			rpcCall := RPCCall{}
@@ -103,6 +123,8 @@ func StartWebSocketClient(info RPCHandlerEndpoint) {
 			}
 		}
 	}()
+
+	return nil
 }
 
 func init() {

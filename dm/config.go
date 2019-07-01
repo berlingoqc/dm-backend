@@ -67,6 +67,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	localHandler.Handlers["pipeline"] = &pipeline.RPCPipeline{}
 	localHandler.Handlers["tr"] = &tr.RPC{}
 	localHandler.Handlers["program"] = &program.RPC{}
+	localHandler.Handlers["proxyws"] = &rpcproxy.RPCWS{}
 
 	// Ajout le hander local avec la reflexion sur les existants
 	rpcproxy.RegisterLocalHandler("dm", localHandler)
