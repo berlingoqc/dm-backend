@@ -14,9 +14,10 @@ import (
 
 // SecurityConfig ...
 type SecurityConfig struct {
-	Secure bool   `json:"secure"`
-	Cert   string `json:"cert"`
-	Key    string `json:"key"`
+	Secure  bool   `json:"secure"`
+	Cert    string `json:"cert"`
+	Key     string `json:"key"`
+	AuthKey string `json:"authkey"`
 }
 
 // WebServer my webserver that work with my modules implements of IWebServer

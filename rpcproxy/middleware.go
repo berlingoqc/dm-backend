@@ -13,13 +13,15 @@ func addCors(w http.ResponseWriter) {
 var SecurityHeader = "X-dm-auth"
 
 // ValidToken ...
-var ValidToken func(token string) error
+var ValidToken func(token string, r *http.Request) error
 
-// validAuthentification ...
-func validAuthentification(w http.ResponseWriter, r *http.Request) {
-	token := r.Header.Get(SecurityHeader)
-	if err := ValidToken(token); err != nil {
-
-	}
-
+func AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token := r.Header.Get(SecurityHeader)
+		if err := ValidToken(token, r); err != nil {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
 }

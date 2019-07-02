@@ -1,6 +1,7 @@
 package dm
 
 import (
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -86,6 +87,16 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	handler := rpcproxy.Register(r)
 
 	r.Use(mux.CORSMethodMiddleware(r))
+
+	if config.Security.AuthKey != "" {
+		rpcproxy.ValidToken = func(token string, r *http.Request) error {
+			if token != config.Security.AuthKey {
+				return errors.New("invalid authkey")
+			}
+			return nil
+		}
+		r.Use(rpcproxy.AuthMiddleware)
+	}
 
 	return &webserver.WebServer{
 		Security:    config.Security,
