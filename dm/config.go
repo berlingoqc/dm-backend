@@ -27,9 +27,10 @@ import (
 
 // Config ...
 type Config struct {
-	URL     string                                  `json:"url"`
-	Handler map[string]*rpcproxy.RPCHandlerEndpoint `json:"handler"`
-	Program []*program.Settings                     `json:"program"`
+	URL      string                                  `json:"url"`
+	Handler  map[string]*rpcproxy.RPCHandlerEndpoint `json:"handler"`
+	Program  []*program.Settings                     `json:"program"`
+	Security *webserver.SecurityConfig               `json:"security"`
 }
 
 // Load ...
@@ -84,7 +85,10 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	r := mux.NewRouter()
 	handler := rpcproxy.Register(r)
 
+	r.Use(mux.CORSMethodMiddleware(r))
+
 	return &webserver.WebServer{
+		Security:    config.Security,
 		Logger:      log.New(os.Stdout, "", 0),
 		Mux:         r,
 		ChannelStop: make(chan os.Signal, 1),

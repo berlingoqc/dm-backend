@@ -12,6 +12,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
+// SecurityConfig ...
+type SecurityConfig struct {
+	Secure bool   `json:"secure"`
+	Cert   string `json:"cert"`
+	Key    string `json:"key"`
+}
+
 // WebServer my webserver that work with my modules implements of IWebServer
 type WebServer struct {
 	// Logger of the web site and its module
@@ -22,6 +29,22 @@ type WebServer struct {
 	Hs *http.Server
 	// ChannelStop is the channel to stop the webserver
 	ChannelStop chan os.Signal
+	// Settings de la securité
+	Security *SecurityConfig
+}
+
+func (w *WebServer) start() {
+	var err error
+	if w.Security.Secure {
+		println("Starting mode secure")
+		err = w.Hs.ListenAndServeTLS(w.Security.Cert, w.Security.Key)
+	} else {
+		println("Starting mode unsecure")
+		err = w.Hs.ListenAndServe()
+	}
+	if err != http.ErrServerClosed {
+		w.Logger.Fatal(err)
+	}
 }
 
 // StartAsync demarre le serveur web
@@ -32,18 +55,13 @@ func (w *WebServer) StartAsync() {
 	signal.Notify(w.ChannelStop, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		w.Logger.Printf("Starting yawf.ca at %v\n", w.Hs.Addr)
-		if err := w.Hs.ListenAndServe(); err != http.ErrServerClosed {
-			w.Logger.Fatal(err)
-		}
+		w.start()
 	}()
 }
 
 // Start demarrer le server web de facon synchrone
 func (w *WebServer) Start() {
-	if err := w.Hs.ListenAndServe(); err != nil {
-		w.Logger.Fatal(err)
-	}
+	w.start()
 }
 
 // Stop arrête le serveur web
