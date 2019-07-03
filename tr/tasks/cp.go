@@ -20,7 +20,7 @@ func (c *CPTask) Get() task.ITask {
 
 // GetID ...
 func (c *CPTask) GetID() string {
-	return "CPP"
+	return c.GetInfo().Name
 }
 
 // GetInfo ...
@@ -36,7 +36,11 @@ func (c *CPTask) GetInfo() task.TaskInfo {
 				Description: "Folder where to copy the file",
 			},
 		},
-		NumberReturn: 1,
+		Return: []task.Return{
+			task.Return{
+				Description: "The file created by the copy",
+			},
+		},
 	}
 }
 

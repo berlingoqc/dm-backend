@@ -8,12 +8,18 @@ type Params struct {
 	Description string `json:"description"`
 }
 
+// Return ...
+type Return struct {
+	Type        string `json:"type"`
+	Description string `json:"description"`
+}
+
 // TaskInfo ...
 type TaskInfo struct {
-	Name         string   `json:"name"`
-	Description  string   `json:"description"`
-	Params       []Params `json:"params"`
-	NumberReturn int      `json:"numberreturn"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Params      []Params `json:"params"`
+	Return      []Return `json:"return"`
 }
 
 // TaskOver ...

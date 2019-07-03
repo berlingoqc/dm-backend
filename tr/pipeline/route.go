@@ -63,6 +63,15 @@ func (r *RPCPipeline) Register(handlerName, pipeline string, data []interface{})
 	}
 }
 
+// StartOnLocalFile ....
+func (r *RPCPipeline) StartOnLocalFile(filepath string, pipelineid string, data map[string]interface{}) (status *ActivePipelineStatus) {
+	var err error
+	if status, err = StartOnLocalFile(filepath, pipelineid); err == nil {
+		return status
+	}
+	panic(err)
+}
+
 // Create ...
 func (r *RPCPipeline) Create(data map[string]interface{}) {
 	var pipeline Pipeline

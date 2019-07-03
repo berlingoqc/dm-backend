@@ -3,6 +3,7 @@ package pipeline
 import (
 	"errors"
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -111,21 +112,16 @@ func savePipelineFile(pipeline *Pipeline) error {
 	return file.SaveJSON(filepath, pipeline)
 }
 
-// remove from RegisterPipeline and add to ActivePipeline
-func registerToActivePipeline(idRegister string, pipelineName string) *ActivePipelineStatus {
-	// Delete from register pipeline
-	delete(RegisterPipelines, idRegister)
-	// Cree la nouvelle pipeline active
-	status := &ActivePipelineStatus{Pipeline: pipelineName, State: PipelineRunning, TaskResult: make(map[string][]string)}
-	ActivePipelines[pipelineName] = status
+func createActivePipeline(id string, pipelineid string) *ActivePipelineStatus {
+	status := &ActivePipelineStatus{Pipeline: pipelineid, State: PipelineRunning, TaskResult: make(map[string][]string)}
+	ActivePipelines[id] = status
 	FeedBack("pipeline", OnPipelineActiveUpdate, nil)
 	FeedBack("pipeline", OnPipelineRegisterUpdate, nil)
 	return status
 }
 
-func startPipeline(id string, pipeline *Pipeline) {
-	status := registerToActivePipeline(id, pipeline.Name)
-
+func startPipeline(id string, status *ActivePipelineStatus, pipeline *Pipeline) {
+	nodes := make(chan *task.TaskNode)
 	currentNode := pipeline.Node
 	chTasks := make(chan task.TaskFeedBack)
 	FeedBack("pipeline", OnPipelineStart, pipeline.ID)
@@ -171,17 +167,34 @@ LoopNode:
 	}
 	status.State = PipelineOver
 	FeedBack("pipeline", OnPipelineEnd, id)
+
 }
 
-// Start ...
-func Start(id string) error {
+// StartOnLocalFile ...
+func StartOnLocalFile(filepath string, pipelineid string) (*ActivePipelineStatus, error) {
+	if _, err := os.Stat(filepath); os.IsNotExist(err) {
+		return nil, err
+	}
+	if pipeline, ok := Pipelines[pipelineid]; ok {
+		status := &ActivePipelineStatus{Pipeline: pipeline.ID, State: PipelineRunning, TaskResult: make(map[string][]string)}
+		ActivePipelines[filepath] = status
+		return status, nil
+	}
+	return nil, errors.New("Pipeline not found")
+}
+
+// StartFromRegister ...
+func StartFromRegister(id string) (*ActivePipelineStatus, error) {
 	if pipelineName, ok := RegisterPipelines[id]; ok {
 		if pipeline, ok := Pipelines[pipelineName.Pipeline]; ok {
-			startPipeline(id, &pipeline)
+			delete(RegisterPipelines, id)
+			status := createActivePipeline(id, pipeline.ID)
+			startPipeline(id, status, &pipeline)
+			return status, nil
 		}
-		return errors.New("Pipeline not found " + pipelineName.Pipeline)
+		return nil, errors.New("Pipeline not found " + pipelineName.Pipeline)
 	}
-	return errors.New("RegisterPipeline not found " + id)
+	return nil, errors.New("RegisterPipeline not found " + id)
 }
 
 func init() {

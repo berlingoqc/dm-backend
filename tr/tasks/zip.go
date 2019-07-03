@@ -45,6 +45,11 @@ func (c *ZipTask) GetInfo() task.TaskInfo {
 				Description: "Folder where to unzip the archive",
 			},
 		},
+		Return: []task.Return{
+			task.Return{
+				Description: "the archive created",
+			},
+		},
 	}
 }
 

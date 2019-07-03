@@ -16,7 +16,7 @@ func fileHandlerMainLoop() {
 		select {
 		case trigger := <-TriggerEventChannel:
 			println("EVENT ", trigger.Event, " for file ", trigger.File)
-			go pipeline.Start(trigger.File)
+			go pipeline.StartFromRegister(trigger.File)
 		}
 	}
 
