@@ -4,19 +4,28 @@
     "secure": false,
     "cert": "server.crt",
     "key": "server.key",
-    "authkey": "odsadsafcee32"
+    "authkey": ""
   },
   "handler": {
     "aria2": {
       "namespace": "aria2",
       "url": "localhost:6800"
+    },
+    "ydl": {
+      "namespace": "ydl",
+      "url": "localhost:3001"
     }
   },
   "program": [
     {
       "name": "aria2c",
       "mode": "PATH",
-      "args": ["--conf-path=../dm/aria2/aria2.conf"]
+      "args": ["--conf-path=../aria2/aria2.conf"]
+    },
+    {
+      "name": "youtube-dl-rpc",
+      "mode": "PATH",
+      "args": ["/etc/ydl-rpc/config.json"]
     }
   ]
 }

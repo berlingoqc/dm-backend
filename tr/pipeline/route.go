@@ -22,6 +22,11 @@ func (r *RPCPipeline) GetPipelines() map[string]Pipeline {
 	return Pipelines
 }
 
+// GetPipeline ...
+func (r *RPCPipeline) GetPipeline(id string) Pipeline {
+	return Pipelines[id]
+}
+
 // GetRegister ...
 func (r *RPCPipeline) GetRegister() map[string]RegisterPipeline {
 	return RegisterPipelines
