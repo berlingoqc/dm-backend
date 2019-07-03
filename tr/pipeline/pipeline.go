@@ -120,18 +120,62 @@ func createActivePipeline(id string, pipelineid string) *ActivePipelineStatus {
 	return status
 }
 
+
+type taskQueue struct {
+	// level on the task in the pipeline
+	Level int
+	// Index on the task in the return
+	Index int
+	// The id of the task
+	TaskID string
+}
+
+
 func startPipeline(id string, status *ActivePipelineStatus, pipeline *Pipeline) {
-	nodes := make(chan *task.TaskNode)
-	currentNode := pipeline.Node
+	var t ITask
+	files := make([][]string,1)
+	files[0] := []string{id}
+
+	nextNodes := make(chan taskQueue)
 	chTasks := make(chan task.TaskFeedBack)
+
+	currentLevel := 0
+
 	FeedBack("pipeline", OnPipelineStart, pipeline.ID)
+
+	nextNodes <- taskQueue{
+		Index: 0,
+		Level: currentLevel,
+		TaskID: pipeline.Node.TaskID,
+	}
+
+
 LoopNode:
 	for {
-		t := task.GetTask(currentNode.TaskID)
-		if t == nil {
-			FeedBack("pipeline", OnPipelineError, "task not found")
+		// Regarde dans le channel pour avoir le nom de la prochaine task a executer
+		var taskQueueCurrent taskQueue
+		select {
+		case taskQueueCurrent = <-nextNodes:
+			t = task.GetTask(taskQueueCurrent.TaskID)
+			if t == nil {
+				FeedBack("pipeline", OnPipelineError, "task not found")
+				break LoopNode
+			}
+			break
+		default:
+			println("No more data in the channel pipeline is over")
 			break LoopNode
 		}
+		if taskQueueCurrent.Level > currentLevel {
+			println("Switching to next level of task")
+			currentLevel = taskQueueCurrent.Level
+		}
+		// Regarde si la tache a des sous-tache et les ajoutes a la liste de tache a executer
+		for _, v := range t.NextNode {
+
+		}
+
+
 		FeedBack("pipeline", OnTaskStart, currentNode.TaskID)
 		status.ActiveTask = append(status.ActiveTask, t.GetID())
 		go t.Execute(id, currentNode.Params, chTasks)
