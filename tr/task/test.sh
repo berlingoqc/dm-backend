@@ -1,7 +1,9 @@
 #! /bin/bash
 
-echo "dsada"
 
-echo "$1;/home/wq;"
+echo "EXEC FILE $1"
+echo "ARG : \$MEDIA ${MEDIA}"
+
+echo "$1/${MEDIA};/home/wq;"
 
 exit 0

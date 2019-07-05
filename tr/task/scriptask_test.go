@@ -11,9 +11,13 @@ func TestScriptTask(t *testing.T) {
 
 	channel := make(chan TaskFeedBack, 5)
 
-	task.Execute("/home/wq/test.py", nil, channel)
+	task.Execute("/home/wq/test.py", map[string]interface{}{
+		"MEDIA": "lol",
+	}, channel)
 
 	d := <-channel
 	taskOver := d.Message.(TaskOver)
-	println(taskOver.Files[0])
+	for _, v := range taskOver.Files {
+		println(v)
+	}
 }

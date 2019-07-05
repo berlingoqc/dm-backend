@@ -1,6 +1,7 @@
 package task
 
 import (
+	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -8,21 +9,33 @@ import (
 	"sync"
 )
 
+func removeEmptyStr(data []string) (ret []string) {
+	for _, v := range data {
+		if v != "" {
+			ret = append(ret, v)
+		}
+	}
+	return ret
+}
+
 func copyAndCapture(r io.Reader) (string, error) {
-	var lastline string
+	var laststring string
 	buf := make([]byte, 1024, 1024)
 	for {
 		n, err := r.Read(buf[:])
 		if n > 0 {
 			d := buf[:n]
-			println(d)
+			laststring = string(d)
 		}
 		if err != nil {
-			// Read returns io.EOF at the end of file, which is not an error for us
 			if err == io.EOF {
 				err = nil
 			}
-			return lastline, err
+			items := removeEmptyStr(strings.Split(laststring, "\n"))
+			if len(items) > 0 {
+				return items[len(items)-1], nil
+			}
+			return "", errors.New("No data return")
 		}
 	}
 }
@@ -53,7 +66,7 @@ func (b *InterpretorTask) GetInfo() TaskInfo {
 func (b *InterpretorTask) Execute(file string, params map[string]interface{}, channel chan TaskFeedBack) {
 	cmd := exec.Command(b.Interpretor, b.File, file)
 
-	//cmd.Env = addMapToEnv(params)
+	cmd.Env = addMapToEnv(params)
 
 	output, _ := cmd.StdoutPipe()
 
@@ -77,11 +90,14 @@ func (b *InterpretorTask) Execute(file string, params map[string]interface{}, ch
 	}
 	files := strings.Split(lastLine, ";")
 	SendDone(channel, TaskOver{
-		Files: files,
+		Files: removeEmptyStr(files),
 	})
 }
 
 func addMapToEnv(data map[string]interface{}) (newEnv []string) {
 	newEnv = os.Environ()
+	for v, k := range data {
+		newEnv = append(newEnv, strings.ToUpper(v)+"="+k.(string))
+	}
 	return newEnv
 }
