@@ -10,5 +10,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c // indirect
+	github.com/rs/cors v1.6.0
 	golang.org/x/crypto v0.0.0-20190621222207-cc06ce4a13d4 // indirect
 )

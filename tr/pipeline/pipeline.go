@@ -120,43 +120,39 @@ func createActivePipeline(id string, pipelineid string) *ActivePipelineStatus {
 	return status
 }
 
-
 type taskQueue struct {
-	// level on the task in the pipeline
-	Level int
 	// Index on the task in the return
 	Index int
-	// The id of the task
-	TaskID string
+	// The task node
+	TaskNode *task.TaskNode
+	// Result of the task , the list of file
+	Result []string
+	// Previous item to retrieve the result
+	Previous *taskQueue
 }
 
-
 func startPipeline(id string, status *ActivePipelineStatus, pipeline *Pipeline) {
-	var t ITask
-	files := make([][]string,1)
-	files[0] := []string{id}
+	var t task.ITask
 
-	nextNodes := make(chan taskQueue)
+	nextNodes := make(chan *taskQueue, 5)
 	chTasks := make(chan task.TaskFeedBack)
-
-	currentLevel := 0
-
 	FeedBack("pipeline", OnPipelineStart, pipeline.ID)
 
-	nextNodes <- taskQueue{
-		Index: 0,
-		Level: currentLevel,
-		TaskID: pipeline.Node.TaskID,
+	nextNodes <- &taskQueue{
+		Index:    0,
+		TaskNode: &pipeline.Node,
+		Previous: &taskQueue{
+			Result: []string{id},
+		},
 	}
 
-
+	var taskQueueCurrent *taskQueue
 LoopNode:
 	for {
 		// Regarde dans le channel pour avoir le nom de la prochaine task a executer
-		var taskQueueCurrent taskQueue
 		select {
 		case taskQueueCurrent = <-nextNodes:
-			t = task.GetTask(taskQueueCurrent.TaskID)
+			t = task.GetTask(taskQueueCurrent.TaskNode.TaskID)
 			if t == nil {
 				FeedBack("pipeline", OnPipelineError, "task not found")
 				break LoopNode
@@ -166,19 +162,30 @@ LoopNode:
 			println("No more data in the channel pipeline is over")
 			break LoopNode
 		}
-		if taskQueueCurrent.Level > currentLevel {
-			println("Switching to next level of task")
-			currentLevel = taskQueueCurrent.Level
-		}
 		// Regarde si la tache a des sous-tache et les ajoutes a la liste de tache a executer
-		for _, v := range t.NextNode {
-
+		for i, v := range taskQueueCurrent.TaskNode.NextNode {
+			if v != nil {
+				println("Adding task ", v.TaskID)
+				nextNodes <- &taskQueue{
+					Index:    i,
+					TaskNode: v,
+					Previous: taskQueueCurrent,
+				}
+			}
 		}
-
+		currentNode := taskQueueCurrent.TaskNode
 
 		FeedBack("pipeline", OnTaskStart, currentNode.TaskID)
 		status.ActiveTask = append(status.ActiveTask, t.GetID())
-		go t.Execute(id, currentNode.Params, chTasks)
+		// Get le nom du next fichier
+		if taskQueueCurrent.Previous == nil || len(taskQueueCurrent.Previous.Result) < taskQueueCurrent.Index {
+			FeedBack("pipeline", OnPipelineError, "files needed at index is not present")
+			break LoopNode
+		}
+		nextFile := taskQueueCurrent.Previous.Result[taskQueueCurrent.Index]
+		println("Starting task on file ", nextFile)
+
+		go t.Execute(nextFile, currentNode.Params, chTasks)
 	LoopTask:
 		for {
 			select {
@@ -186,17 +193,13 @@ LoopNode:
 				switch feedback.Event {
 				case task.DoneFeedBack:
 					FeedBack("pipeline", OnTaskEnd, currentNode.TaskID)
-					if len(currentNode.NextNode) == 0 {
-						break LoopNode
+					if over, ok := feedback.Message.(task.TaskOver); ok && len(over.Files) > 0 {
+						taskQueueCurrent.Result = over.Files
+						break LoopTask
 					} else {
-						if over, ok := feedback.Message.(task.TaskOver); ok && len(over.Files) > 0 {
-							id = over.Files[0]
-							currentNode = currentNode.NextNode[0]
-						} else {
-							FeedBack("pipeline", OnPipelineError, "could not get information to start next task")
-						}
+						FeedBack("pipeline", OnPipelineError, "could not get information to start next task")
+						break LoopNode
 					}
-					break LoopTask
 				case task.OutFeedBack:
 					FeedBack("pipeline", OnTaskUpdate, feedback.Message)
 					status.TaskResult[t.GetID()] = append(status.TaskResult[t.GetID()], feedback.Message.(string))
@@ -211,7 +214,6 @@ LoopNode:
 	}
 	status.State = PipelineOver
 	FeedBack("pipeline", OnPipelineEnd, id)
-
 }
 
 // StartOnLocalFile ...
@@ -222,6 +224,7 @@ func StartOnLocalFile(filepath string, pipelineid string) (*ActivePipelineStatus
 	if pipeline, ok := Pipelines[pipelineid]; ok {
 		status := &ActivePipelineStatus{Pipeline: pipeline.ID, State: PipelineRunning, TaskResult: make(map[string][]string)}
 		ActivePipelines[filepath] = status
+		startPipeline(filepath, status, &pipeline)
 		return status, nil
 	}
 	return nil, errors.New("Pipeline not found")

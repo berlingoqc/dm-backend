@@ -35,8 +35,5 @@ func messageTrapper(msg rpcproxy.WSMessage) {
 		} else {
 			println("No event for this thing")
 		}
-
-	} else {
-		println("Cant handle this namespace in filehandler ", msg.Namespace)
 	}
 }

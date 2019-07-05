@@ -64,6 +64,6 @@ func (c *CPTask) Execute(fp string, params map[string]interface{}, channel chan 
 		return
 	}
 	task.SendDone(channel, task.TaskOver{
-		Files: []string{c.destination},
+		Files: []string{fp, c.destination},
 	})
 }
