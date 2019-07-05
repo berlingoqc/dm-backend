@@ -1,96 +1,12 @@
 package pipeline
 
 import (
-	"errors"
-	"io/ioutil"
-	"os"
-	"path"
 	"path/filepath"
-	"strings"
 
 	"github.com/berlingoqc/dm-backend/file"
 	"github.com/berlingoqc/dm-backend/tr/task"
 	"github.com/mitchellh/go-homedir"
 )
-
-// FeedBack ...
-var FeedBack func(namespace string, event string, data interface{})
-
-// PipelineState ...
-type PipelineState string
-
-const (
-	// PipelineRunning ...
-	PipelineRunning PipelineState = "running"
-	// PipelineCancel ...
-	PipelineCancel PipelineState = "cancel"
-	// PipelinePaused ...
-	PipelinePaused PipelineState = "paused"
-	// PipelineOver ...
-	PipelineOver PipelineState = "over"
-)
-
-const (
-	// OnPipelineStart ...
-	OnPipelineStart = "onPipelineStart"
-	// OnPipelineEnd ...
-	OnPipelineEnd = "onPipelineEnd"
-	// OnPipelineError ...
-	OnPipelineError = "onPipelineError"
-	// OnPipelineStatusUpdate ...
-	OnPipelineStatusUpdate = "onPipelineStatusUpdate"
-	// OnTaskStart ...
-	OnTaskStart = "onTaskStart"
-	// OnTaskEnd ...
-	OnTaskEnd = "onTaskEnd"
-	// OnTaskError ...
-	OnTaskError = "onTaskError"
-	// OnTaskUpdate ...
-	OnTaskUpdate = "onTaskUpdate"
-	// OnPipelineRegisterUpdate ...
-	OnPipelineRegisterUpdate = "onPipelineRegisterUpdate"
-	// OnPipelineActiveUpdate ...
-	OnPipelineActiveUpdate = "onPipelineActiveUpdate"
-)
-
-var (
-	// MaximalPipelineRunning is the number of pipeline that can run at the same time
-	MaximalPipelineRunning = 3
-)
-
-// ActivePipelineStatus ...
-type ActivePipelineStatus struct {
-	Pipeline   string              `json:"pipeline"`
-	State      PipelineState       `json:"state"`
-	ActiveTask []string            `json:"activetask"`
-	TaskResult map[string][]string `json:"taskresult"`
-	Register   RegisterPipeline    `json:"register"`
-}
-
-// RegisterPipeline ...
-type RegisterPipeline struct {
-	File     string        `json:"file"`
-	Pipeline string        `json:"pipeline"`
-	Provider string        `json:"provider"`
-	Data     []interface{} `json:"data"`
-}
-
-// Pipeline is a definition of task to execute on a file
-type Pipeline struct {
-	ID   string        `json:"id"`
-	Name string        `json:"name"`
-	Node task.TaskNode `json:"node"`
-}
-
-// Pipelines contains all the available pipeline
-var Pipelines = make(map[string]Pipeline)
-
-// RegisterPipelines contains the pipeline that are register
-// and waiting a download before to be started
-var RegisterPipelines = make(map[string]RegisterPipeline)
-
-// ActivePipelines contains the pipeline that are currently running
-var ActivePipelines = make(map[string]*ActivePipelineStatus)
 
 func getWorkingPath() string {
 	dir, _ := homedir.Dir()
@@ -131,7 +47,19 @@ type taskQueue struct {
 	Previous *taskQueue
 }
 
-func startPipeline(id string, status *ActivePipelineStatus, pipeline *Pipeline) {
+func startPipeline(id string, pip *Pipeline, data map[string]interface{}) (*ActivePipelineStatus, error) {
+	newPipeline := &Pipeline{}
+	cloneValue(pip, newPipeline)
+
+	status := createActivePipeline(id, pip.ID)
+	if err := replaceParamPipelineTask(newPipeline, data); err != nil {
+		return nil, err
+	}
+	go pipeline(id, status, pip)
+	return status, nil
+}
+
+func pipeline(id string, status *ActivePipelineStatus, pipeline *Pipeline) {
 	var t task.ITask
 
 	nextNodes := make(chan *taskQueue, 5)
@@ -140,7 +68,7 @@ func startPipeline(id string, status *ActivePipelineStatus, pipeline *Pipeline) 
 
 	nextNodes <- &taskQueue{
 		Index:    0,
-		TaskNode: &pipeline.Node,
+		TaskNode: pipeline.Node,
 		Previous: &taskQueue{
 			Result: []string{id},
 		},
@@ -214,50 +142,4 @@ LoopNode:
 	}
 	status.State = PipelineOver
 	FeedBack("pipeline", OnPipelineEnd, id)
-}
-
-// StartOnLocalFile ...
-func StartOnLocalFile(filepath string, pipelineid string) (*ActivePipelineStatus, error) {
-	if _, err := os.Stat(filepath); os.IsNotExist(err) {
-		return nil, err
-	}
-	if pipeline, ok := Pipelines[pipelineid]; ok {
-		status := &ActivePipelineStatus{Pipeline: pipeline.ID, State: PipelineRunning, TaskResult: make(map[string][]string)}
-		ActivePipelines[filepath] = status
-		startPipeline(filepath, status, &pipeline)
-		return status, nil
-	}
-	return nil, errors.New("Pipeline not found")
-}
-
-// StartFromRegister ...
-func StartFromRegister(id string) (*ActivePipelineStatus, error) {
-	if pipelineName, ok := RegisterPipelines[id]; ok {
-		if pipeline, ok := Pipelines[pipelineName.Pipeline]; ok {
-			delete(RegisterPipelines, id)
-			status := createActivePipeline(id, pipeline.ID)
-			startPipeline(id, status, &pipeline)
-			return status, nil
-		}
-		return nil, errors.New("Pipeline not found " + pipelineName.Pipeline)
-	}
-	return nil, errors.New("RegisterPipeline not found " + id)
-}
-
-func init() {
-	// Loading pipeline
-	folderPath := getWorkingPath()
-	files, err := ioutil.ReadDir(folderPath)
-	if err != nil {
-		panic(err)
-	}
-	for _, f := range files {
-		println("Loading pipeline ", f.Name())
-		id := strings.TrimSuffix(f.Name(), path.Ext(f.Name()))
-		pipeline, err := getPipelineFile(id)
-		if err != nil {
-			panic(err)
-		}
-		Pipelines[id] = *pipeline
-	}
 }

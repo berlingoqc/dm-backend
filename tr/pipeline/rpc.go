@@ -42,7 +42,7 @@ func (r *RPCPipeline) GetActive() []*ActivePipelineStatus {
 }
 
 // Register ...
-func (r *RPCPipeline) Register(handlerName, pipeline string, data []interface{}) {
+func (r *RPCPipeline) Register(handlerName, pipeline string, data []interface{}, params map[string]interface{}) {
 	if handler, ok := Handlers[handlerName]; ok {
 		filepath, err := handler.GetFilePath(data)
 		if err != nil {
@@ -55,7 +55,7 @@ func (r *RPCPipeline) Register(handlerName, pipeline string, data []interface{})
 			File:     filepath,
 			Pipeline: pipeline,
 			Provider: handlerName,
-			Data:     data,
+			Data:     params,
 		}
 		println("Pipeline register")
 	} else {
@@ -66,7 +66,7 @@ func (r *RPCPipeline) Register(handlerName, pipeline string, data []interface{})
 // StartOnLocalFile ....
 func (r *RPCPipeline) StartOnLocalFile(filepath string, pipelineid string, data map[string]interface{}) (status *ActivePipelineStatus) {
 	var err error
-	if status, err = StartOnLocalFile(filepath, pipelineid); err == nil {
+	if status, err = StartOnLocalFile(filepath, pipelineid, data); err == nil {
 		return status
 	}
 	panic(err)
