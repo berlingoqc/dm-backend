@@ -52,14 +52,12 @@ func startPipeline(id string, pip *Pipeline, data map[string]interface{}) (*Acti
 	cloneValue(pip, newPipeline)
 
 	status := createActivePipeline(id, pip.ID)
-	if err := replaceParamPipelineTask(newPipeline, data); err != nil {
-		return nil, err
-	}
-	go pipeline(id, status, pip)
+
+	go pipeline(id, status, pip, data)
 	return status, nil
 }
 
-func pipeline(id string, status *ActivePipelineStatus, pipeline *Pipeline) {
+func pipeline(id string, status *ActivePipelineStatus, pipeline *Pipeline, data map[string]interface{}) {
 	var t task.ITask
 
 	nextNodes := make(chan *taskQueue, 5)
@@ -113,7 +111,10 @@ LoopNode:
 		nextFile := taskQueueCurrent.Previous.Result[taskQueueCurrent.Index]
 		println("Starting task on file ", nextFile)
 
-		go t.Execute(nextFile, currentNode.Params, chTasks)
+		params, _ := replaceParams(currentNode.Params, data)
+
+		go t.Execute(nextFile, params, chTasks)
+
 	LoopTask:
 		for {
 			select {
