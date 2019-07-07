@@ -56,7 +56,8 @@ var (
 type ActivePipelineStatus struct {
 	Pipeline   string              `json:"pipeline"`
 	State      State               `json:"state"`
-	ActiveTask []string            `json:"activetask"`
+	ActiveTask string              `json:"activetask"`
+	TaskOutput map[string][]string `json:"taskouput"`
 	TaskResult map[string][]string `json:"taskresult"`
 	Register   RegisterPipeline    `json:"register"`
 }
@@ -78,9 +79,9 @@ type Variables struct {
 
 // Pipeline is a definition of task to execute on a file
 type Pipeline struct {
-	ID        string `json:"id"`
-	Name      string `json:"name"`
-	Variables []Variables
+	ID        string         `json:"id"`
+	Name      string         `json:"name"`
+	Variables []Variables    `json:"variables"`
 	Node      *task.TaskNode `json:"node"`
 }
 

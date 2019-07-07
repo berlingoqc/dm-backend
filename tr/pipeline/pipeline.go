@@ -29,22 +29,22 @@ func savePipelineFile(pipeline *Pipeline) error {
 }
 
 func createActivePipeline(id string, pipelineid string) *ActivePipelineStatus {
-	status := &ActivePipelineStatus{Pipeline: pipelineid, State: PipelineRunning, TaskResult: make(map[string][]string)}
+	status := &ActivePipelineStatus{Pipeline: pipelineid, State: PipelineRunning, TaskResult: make(map[string][]string), TaskOutput: make(map[string][]string)}
 	ActivePipelines[id] = status
 	FeedBack("pipeline", OnPipelineActiveUpdate, nil)
-	FeedBack("pipeline", OnPipelineRegisterUpdate, nil)
+	FeedBack("pipeline", OnPipelineRegisterUpdate, id)
 	return status
 }
 
 type taskQueue struct {
 	// Index on the task in the return
-	Index int
+	Index int `json:"index"`
 	// The task node
-	TaskNode *task.TaskNode
+	TaskNode *task.TaskNode `json:"tasknode"`
 	// Result of the task , the list of file
-	Result []string
+	Result []string `json:"result"`
 	// Previous item to retrieve the result
-	Previous *taskQueue
+	Previous *taskQueue `json:"previous"`
 }
 
 func startPipeline(id string, pip *Pipeline, data map[string]interface{}) (*ActivePipelineStatus, error) {
@@ -102,7 +102,7 @@ LoopNode:
 		currentNode := taskQueueCurrent.TaskNode
 
 		FeedBack("pipeline", OnTaskStart, currentNode.TaskID)
-		status.ActiveTask = append(status.ActiveTask, t.GetID())
+		status.ActiveTask = t.GetID()
 		// Get le nom du next fichier
 		if taskQueueCurrent.Previous == nil || len(taskQueueCurrent.Previous.Result) < taskQueueCurrent.Index {
 			FeedBack("pipeline", OnPipelineError, "files needed at index is not present")
@@ -121,9 +121,10 @@ LoopNode:
 			case feedback := <-chTasks:
 				switch feedback.Event {
 				case task.DoneFeedBack:
-					FeedBack("pipeline", OnTaskEnd, currentNode.TaskID)
 					if over, ok := feedback.Message.(task.TaskOver); ok && len(over.Files) > 0 {
 						taskQueueCurrent.Result = over.Files
+						status.TaskOutput[currentNode.TaskID] = over.Files
+						FeedBack("pipeline", OnTaskEnd, status)
 						break LoopTask
 					} else {
 						FeedBack("pipeline", OnPipelineError, "could not get information to start next task")
@@ -131,11 +132,11 @@ LoopNode:
 					}
 				case task.OutFeedBack:
 					FeedBack("pipeline", OnTaskUpdate, feedback.Message)
-					status.TaskResult[t.GetID()] = append(status.TaskResult[t.GetID()], feedback.Message.(string))
+					status.TaskResult[currentNode.TaskID] = append(status.TaskResult[t.GetID()], feedback.Message.(string))
 				case task.ErrorFeedBack:
 					err := feedback.Message.(error).Error()
 					FeedBack("pipeline", OnTaskError, err)
-					status.TaskResult[t.GetID()] = append(status.TaskResult[t.GetID()], err)
+					status.TaskResult[currentNode.TaskID] = append(status.TaskResult[t.GetID()], err)
 					break LoopNode
 				}
 			}

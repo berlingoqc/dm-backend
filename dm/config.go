@@ -72,6 +72,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	localHandler.Handlers["task"] = &task.RPCTask{}
 	localHandler.Handlers["pipeline"] = &pipeline.RPCPipeline{}
 	localHandler.Handlers["tr"] = &tr.RPC{}
+	localHandler.Handlers["fe"] = &file.RPC{}
 	localHandler.Handlers["program"] = &program.RPC{}
 	localHandler.Handlers["proxyws"] = &rpcproxy.RPCWS{}
 

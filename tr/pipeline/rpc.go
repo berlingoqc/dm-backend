@@ -32,13 +32,18 @@ func (r *RPCPipeline) GetRegister() map[string]RegisterPipeline {
 	return RegisterPipelines
 }
 
-// GetActive ...
-func (r *RPCPipeline) GetActive() []*ActivePipelineStatus {
-	var a []*ActivePipelineStatus
-	for _, v := range ActivePipelines {
-		a = append(a, v)
-	}
-	return a
+// GetActive ....
+func (r *RPCPipeline) GetActive(id string) *ActivePipelineStatus {
+	return ActivePipelines[id]
+}
+
+// GetActives ...
+func (r *RPCPipeline) GetActives() map[string]*ActivePipelineStatus {
+	//var a []ActivePipelineStatus
+	//for _, v := range ActivePipelines {
+	//	a = append(a, *v)
+	//}
+	return ActivePipelines
 }
 
 // Register ...

@@ -5,9 +5,17 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"sync"
+
+	"github.com/mitchellh/go-homedir"
 )
+
+func getWorkingPath() string {
+	dir, _ := homedir.Dir()
+	return filepath.Join(dir, ".dm", "script")
+}
 
 func removeEmptyStr(data []string) (ret []string) {
 	for _, v := range data {
@@ -40,31 +48,42 @@ func copyAndCapture(r io.Reader) (string, error) {
 	}
 }
 
+func addMapToEnv(data map[string]interface{}) (newEnv []string) {
+	newEnv = os.Environ()
+	for v, k := range data {
+		newEnv = append(newEnv, strings.ToUpper(v)+"="+k.(string))
+	}
+	return newEnv
+}
+
 // InterpretorTask ...
 type InterpretorTask struct {
-	Interpretor string
-	File        string
-	info        TaskInfo
+	Interpretor string   `json:"interpretor"`
+	File        string   `json:"file"`
+	Info        TaskInfo `json:"info"`
 }
 
 // Get ...
 func (b *InterpretorTask) Get() ITask {
-	return &InterpretorTask{}
+	return b
 }
 
 // GetID ...
 func (b *InterpretorTask) GetID() string {
-	return b.info.Name
+	return b.File
 }
 
 // GetInfo ...
 func (b *InterpretorTask) GetInfo() TaskInfo {
-	return b.info
+	return b.Info
 }
 
 // Execute ...
 func (b *InterpretorTask) Execute(file string, params map[string]interface{}, channel chan TaskFeedBack) {
-	cmd := exec.Command(b.Interpretor, b.File, file)
+
+	f := filepath.Join(getWorkingPath(), b.Interpretor, b.File)
+
+	cmd := exec.Command(b.Interpretor, f, file)
 
 	cmd.Env = addMapToEnv(params)
 
@@ -92,12 +111,4 @@ func (b *InterpretorTask) Execute(file string, params map[string]interface{}, ch
 	SendDone(channel, TaskOver{
 		Files: removeEmptyStr(files),
 	})
-}
-
-func addMapToEnv(data map[string]interface{}) (newEnv []string) {
-	newEnv = os.Environ()
-	for v, k := range data {
-		newEnv = append(newEnv, strings.ToUpper(v)+"="+k.(string))
-	}
-	return newEnv
 }
