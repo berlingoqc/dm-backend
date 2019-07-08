@@ -54,6 +54,7 @@ var (
 
 // ActivePipelineStatus ...
 type ActivePipelineStatus struct {
+	File       string              `json:"file"`
 	Pipeline   string              `json:"pipeline"`
 	State      State               `json:"state"`
 	ActiveTask string              `json:"activetask"`

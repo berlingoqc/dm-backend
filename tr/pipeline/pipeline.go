@@ -29,7 +29,7 @@ func savePipelineFile(pipeline *Pipeline) error {
 }
 
 func createActivePipeline(id string, pipelineid string) *ActivePipelineStatus {
-	status := &ActivePipelineStatus{Pipeline: pipelineid, State: PipelineRunning, TaskResult: make(map[string][]string), TaskOutput: make(map[string][]string)}
+	status := &ActivePipelineStatus{Pipeline: pipelineid, State: PipelineRunning, File: id, TaskResult: make(map[string][]string), TaskOutput: make(map[string][]string)}
 	ActivePipelines[id] = status
 	FeedBack("pipeline", OnPipelineActiveUpdate, nil)
 	FeedBack("pipeline", OnPipelineRegisterUpdate, id)
@@ -124,6 +124,7 @@ LoopNode:
 					if over, ok := feedback.Message.(task.TaskOver); ok && len(over.Files) > 0 {
 						taskQueueCurrent.Result = over.Files
 						status.TaskOutput[currentNode.TaskID] = over.Files
+						status.ActiveTask = ""
 						FeedBack("pipeline", OnTaskEnd, status)
 						break LoopTask
 					} else {
