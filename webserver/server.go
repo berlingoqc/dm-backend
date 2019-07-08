@@ -53,7 +53,7 @@ func (w *WebServer) StartAsync() {
 	// Crée mon channel pour le signal d'arret
 	w.ChannelStop = make(chan os.Signal, 1)
 
-	signal.Notify(w.ChannelStop, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(w.ChannelStop, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 
 	go func() {
 		w.start()
