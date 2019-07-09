@@ -3,3 +3,4 @@ release/
 
 
 __debug_bin
+*.exe
