@@ -1,4 +1,5 @@
 package windows
+
 // +build windows
 import (
 	"fmt"
@@ -13,10 +14,8 @@ import (
 	//"github.com/berlingoqc/dm-backend/dm"
 )
 
-
-var ServiceStartFunc = func()
-var ServiceShutdownFunc = func()
-
+var ServiceStartFunc func()
+var ServiceShutdownFunc func()
 
 var elog debug.Log
 
@@ -27,8 +26,7 @@ func (m *myservice) Execute(args []string, r <-chan svc.ChangeRequest, changes c
 	changes <- svc.Status{State: svc.StartPending}
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
 
-	
-	go Service()
+	go ServiceStartFunc()
 loop:
 	for {
 		select {
