@@ -16,7 +16,7 @@
     {
       "name": "aria2c",
       "mode": "PATH",
-      "args": ["--conf-path=../dm/aria2/aria2.conf"]
+      "args": ["--conf-path=../aria2/aria2.conf"]
     }
   ]
 }
