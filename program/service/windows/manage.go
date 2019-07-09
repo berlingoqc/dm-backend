@@ -1,5 +1,5 @@
-package main
-
+package windows
+// +build windows
 import (
 	"fmt"
 	"time"
