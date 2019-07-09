@@ -1,5 +1,6 @@
-package windows
 // +build windows
+package windows
+
 import (
 	"fmt"
 	"time"

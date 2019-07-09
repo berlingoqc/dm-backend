@@ -18,8 +18,10 @@ all: clean test build
 testall: lint test race msan
 
 install:
-	@install fxbe /usr/bin/
-	@cp fxbe.service /etc/systemd/system/
+	@install dm-backend /usr/bin/
+	@cp dm-backend.service /etc/systemd/system/
+	@mkdir -p /etc/dm
+	@cp config.json /etc/dm/
 
 release: build
 	@mkdir -p ./release/
@@ -29,27 +31,19 @@ build: dep
 	$(GOBUILD)
 
 clean:
-	@rm -rf ./release ./test
+	@rm -rf ./release ./test *.exe
 
 lint:
-	@echo "Start linting"
 	@golint -set_exit_status ${PKG_LIST}
-	@echo "End linting"
 
 test: dep
-	@echo "Start test"
 	@go test -v -short ${PKG_LIST}
-	@echo "End test"
 
 race: dep
-	@echo "Start race"
 	@go test -v -race -short ${PKG_LIST}
-	@echo "End race"
 
 msan: dep
-	@echo "Start msan"
-	@go test -v -msan -short ${PKG_LIST} 
-	@echo "End msan"
+	@go test -v -msan -short ${PKG_LIST}
 
 dep:
 	@go get -v -d ./...

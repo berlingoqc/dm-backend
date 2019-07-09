@@ -1,0 +1,11 @@
+[Unit]
+Description=dm-backend daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/dm-backend --config /etc/dm/config.json
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

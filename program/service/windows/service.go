@@ -1,17 +1,15 @@
+// +build windows
 package windows
 
-// +build windows
 import (
 	"fmt"
 	"strings"
 
-	//"syscall"
 	"time"
 
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/debug"
 	"golang.org/x/sys/windows/svc/eventlog"
-	//"github.com/berlingoqc/dm-backend/dm"
 )
 
 var ServiceStartFunc func()
@@ -25,13 +23,9 @@ func (m *myservice) Execute(args []string, r <-chan svc.ChangeRequest, changes c
 	const cmdsAccepted = svc.AcceptStop | svc.AcceptShutdown | svc.AcceptPauseAndContinue
 	changes <- svc.Status{State: svc.StartPending}
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}
-
-	go ServiceStartFunc()
 loop:
 	for {
 		select {
-		//case <-ws.ChannelStop:
-		//	break
 		case c := <-r:
 			switch c.Cmd {
 			case svc.Interrogate:
