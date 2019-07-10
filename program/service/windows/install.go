@@ -1,7 +1,7 @@
+// +build windows
 package windows
 
 
-// +build windows
 
 import (
 	"fmt"

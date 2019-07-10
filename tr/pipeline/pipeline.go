@@ -1,6 +1,7 @@
 package pipeline
 
 import (
+	"errors"
 	"path/filepath"
 
 	"github.com/berlingoqc/dm-backend/file"
@@ -31,8 +32,8 @@ func savePipelineFile(pipeline *Pipeline) error {
 func createActivePipeline(id string, pipelineid string) *ActivePipelineStatus {
 	status := &ActivePipelineStatus{Pipeline: pipelineid, State: PipelineRunning, File: id, TaskResult: make(map[string][]string), TaskOutput: make(map[string][]string)}
 	ActivePipelines[id] = status
-	FeedBack("pipeline", OnPipelineActiveUpdate, nil)
-	FeedBack("pipeline", OnPipelineRegisterUpdate, id)
+	eventOnPipelineActiveUpdate()
+	eventOnPipelineRegisterUpdate()
 	return status
 }
 
@@ -62,7 +63,7 @@ func pipeline(id string, status *ActivePipelineStatus, pipeline *Pipeline, data 
 
 	nextNodes := make(chan *taskQueue, 5)
 	chTasks := make(chan task.TaskFeedBack)
-	FeedBack("pipeline", OnPipelineStart, pipeline.ID)
+	eventOnPipelineStart(status)
 
 	nextNodes <- &taskQueue{
 		Index:    0,
@@ -80,18 +81,16 @@ LoopNode:
 		case taskQueueCurrent = <-nextNodes:
 			t = task.GetTask(taskQueueCurrent.TaskNode.TaskID)
 			if t == nil {
-				FeedBack("pipeline", OnPipelineError, "task not found")
+				eventOnPipelineError(errors.New("Task not found " + taskQueueCurrent.TaskNode.TaskID))
 				break LoopNode
 			}
 			break
 		default:
-			println("No more data in the channel pipeline is over")
 			break LoopNode
 		}
 		// Regarde si la tache a des sous-tache et les ajoutes a la liste de tache a executer
 		for i, v := range taskQueueCurrent.TaskNode.NextNode {
 			if v != nil {
-				println("Adding task ", v.TaskID)
 				nextNodes <- &taskQueue{
 					Index:    i,
 					TaskNode: v,
@@ -101,11 +100,12 @@ LoopNode:
 		}
 		currentNode := taskQueueCurrent.TaskNode
 
-		FeedBack("pipeline", OnTaskStart, currentNode.TaskID)
+		eventOnTaskStart(currentNode.NodeID)
+
 		status.ActiveTask = t.GetID()
 		// Get le nom du next fichier
 		if taskQueueCurrent.Previous == nil || len(taskQueueCurrent.Previous.Result) < taskQueueCurrent.Index {
-			FeedBack("pipeline", OnPipelineError, "files needed at index is not present")
+			eventOnPipelineError(errors.New("files needed at index is not present"))
 			break LoopNode
 		}
 		nextFile := taskQueueCurrent.Previous.Result[taskQueueCurrent.Index]
@@ -125,24 +125,24 @@ LoopNode:
 						taskQueueCurrent.Result = over.Files
 						status.TaskOutput[currentNode.TaskID] = over.Files
 						status.ActiveTask = ""
-						FeedBack("pipeline", OnTaskEnd, status)
+						eventOnTaskEnd(currentNode.NodeID, taskQueueCurrent.Result)
 						break LoopTask
 					} else {
-						FeedBack("pipeline", OnPipelineError, "could not get information to start next task")
+						eventOnPipelineError(errors.New("could not get information to start next task from output"))
 						break LoopNode
 					}
 				case task.OutFeedBack:
-					FeedBack("pipeline", OnTaskUpdate, feedback.Message)
 					status.TaskResult[currentNode.TaskID] = append(status.TaskResult[t.GetID()], feedback.Message.(string))
+					eventOnTaskUpdate(currentNode.NodeID, status.TaskResult[currentNode.TaskID])
 				case task.ErrorFeedBack:
-					err := feedback.Message.(error).Error()
-					FeedBack("pipeline", OnTaskError, err)
-					status.TaskResult[currentNode.TaskID] = append(status.TaskResult[t.GetID()], err)
+					err := feedback.Message.(error)
+					status.TaskResult[currentNode.TaskID] = append(status.TaskResult[t.GetID()], err.Error())
+					eventOnTaskError(currentNode.NodeID, err, status.TaskResult[currentNode.TaskID])
 					break LoopNode
 				}
 			}
 		}
 	}
 	status.State = PipelineOver
-	FeedBack("pipeline", OnPipelineEnd, id)
+	eventOnPipelineEnd(status)
 }

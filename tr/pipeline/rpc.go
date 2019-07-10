@@ -78,7 +78,7 @@ func (r *RPCPipeline) StartOnLocalFile(filepath string, pipelineid string, data 
 }
 
 // Create ...
-func (r *RPCPipeline) Create(data map[string]interface{}) {
+func (r *RPCPipeline) Create(data map[string]interface{}) Pipeline {
 	var pipeline Pipeline
 	if err := mapstructure.Decode(data, &pipeline); err != nil {
 		panic(err)
@@ -90,18 +90,33 @@ func (r *RPCPipeline) Create(data map[string]interface{}) {
 		panic(err)
 	}
 	Pipelines[pipeline.ID] = pipeline
+	return pipeline
 }
 
 // Delete ...
-func (r *RPCPipeline) Delete(id string) {
+func (r *RPCPipeline) Delete(id string) string {
 	filepath := getPipelineFilePath(id)
 	if err := os.Remove(filepath); err != nil {
 		panic(err)
 	}
 	delete(Pipelines, id)
+	return "OK"
 }
 
 // DeleteRegister ...
-func (r *RPCPipeline) DeleteRegister(id string) {
+func (r *RPCPipeline) DeleteRegister(id string) string {
 	delete(RegisterPipelines, id)
+	return "OK"
+}
+
+// DeleteActive ...
+func (r *RPCPipeline) DeleteActive(id string) string {
+	if status, ok := ActivePipelines[id]; ok {
+		if status.State != PipelineRunning {
+			delete(ActivePipelines, id)
+			return "OK"
+		}
+		panic("Pipeline is running dude")
+	}
+	panic("Active pipeline dont exists")
 }
