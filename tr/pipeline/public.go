@@ -47,6 +47,57 @@ const (
 	OnPipelineActiveUpdate = "onPipelineActiveUpdate"
 )
 
+func eventOnPipelineStart(pipeline *ActivePipelineStatus) {
+	FeedBack("pipeline", OnPipelineStart, pipeline)
+}
+
+func eventOnPipelineEnd(status *ActivePipelineStatus) {
+	FeedBack("pipeline", OnPipelineEnd, status)
+}
+
+func eventOnPipelineError(err error) {
+	FeedBack("pipeline", OnPipelineError, err.Error())
+}
+
+func eventOnPipelineStatusUpdate(status *ActivePipelineStatus) {
+	FeedBack("pipeline", OnPipelineActiveUpdate, status)
+}
+
+func eventOnTaskStart(id string) {
+	FeedBack("pipeline", OnTaskStart, id)
+}
+
+func eventOnTaskEnd(id string, files []string) {
+	FeedBack("pipeline", OnTaskEnd, struct {
+		id    string
+		files []string
+	}{id, files})
+}
+
+func eventOnTaskError(id string, err error, output []string) {
+	FeedBack("pipeline", OnTaskError, struct {
+		id     string
+		err    string
+		output []string
+	}{id, err.Error(), output})
+
+}
+
+func eventOnTaskUpdate(id string, output []string) {
+	FeedBack("pipeline", OnTaskUpdate, struct {
+		id     string
+		output []string
+	}{id, output})
+}
+
+func eventOnPipelineRegisterUpdate() {
+	FeedBack("pipeline", OnPipelineRegisterUpdate, RegisterPipelines)
+}
+
+func eventOnPipelineActiveUpdate() {
+	FeedBack("pipeline", OnPipelineActiveUpdate, ActivePipelines)
+}
+
 var (
 	// MaximalPipelineRunning is the number of pipeline that can run at the same time
 	MaximalPipelineRunning = 3
