@@ -2,10 +2,10 @@ package main
 
 import (
 	"syscall"
+	"time"
 
-	"github.com/berlingoqc/dm-backend/dm"
-	"github.com/berlingoqc/dm-backend/webserver"
 	"github.com/berlingoqc/dm-backend/program/service/windows"
+	"github.com/berlingoqc/dm-backend/webserver"
 	"github.com/getlantern/systray"
 )
 
@@ -13,7 +13,11 @@ func main() {
 	var ws *webserver.WebServer
 
 	windows.ServiceStartFunc = func() {
-		ws = dm.Run()
+		go func() {
+			println("SLEEEPING BEFOIRE STARTING")
+			time.Sleep(10 * time.Second)
+			//ws = dm.Run()
+		}()
 	}
 
 	windows.ServiceShutdownFunc = func() {
@@ -21,5 +25,5 @@ func main() {
 		systray.Quit()
 	}
 
-	windows.ServiceCommand("dm-backend")
+	windows.ServiceCommand("dm-backend", "Dm backend service")
 }

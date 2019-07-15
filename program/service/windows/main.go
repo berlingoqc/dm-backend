@@ -19,7 +19,7 @@ func usage(errmsg string) {
 	os.Exit(2)
 }
 
-func ServiceCommand(svcName string) {
+func ServiceCommand(svcName string, description string) {
 
 	isIntSess, err := svc.IsAnInteractiveSession()
 	if err != nil {
@@ -40,7 +40,7 @@ func ServiceCommand(svcName string) {
 		runService(svcName, true)
 		return
 	case "install":
-		err = installService(svcName, "my service")
+		err = installService(svcName, description)
 	case "remove":
 		err = removeService(svcName)
 	case "start":
