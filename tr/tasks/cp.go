@@ -27,6 +27,7 @@ func (c *CPTask) GetID() string {
 func (c *CPTask) GetInfo() task.TaskInfo {
 	return task.TaskInfo{
 		Name:        "copy",
+		Provider:    "native",
 		Description: "Copy file to another location , work on file and directory",
 		Params: []task.Params{
 			task.Params{

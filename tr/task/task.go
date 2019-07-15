@@ -18,6 +18,7 @@ type Return struct {
 type TaskInfo struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
+	Provider    string   `json:"provider"`
 	Params      []Params `json:"params"`
 	Return      []Return `json:"return"`
 }
@@ -55,7 +56,7 @@ type ITask interface {
 
 // TaskNode ...
 type TaskNode struct {
-	NodeID string `json:"nodeid"`
+	NodeID   string                 `json:"nodeid"`
 	TaskID   string                 `json:"taskid"`
 	Params   map[string]interface{} `json:"params"`
 	NextNode []*TaskNode            `json:"nextnode"`

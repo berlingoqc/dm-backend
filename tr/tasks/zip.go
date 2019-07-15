@@ -30,6 +30,7 @@ func (c *ZipTask) GetID() string {
 func (c *ZipTask) GetInfo() task.TaskInfo {
 	return task.TaskInfo{
 		Name:        "zip",
+		Provider:    "native",
 		Description: "Unzip the archive to a directory",
 		Params: []task.Params{
 			task.Params{

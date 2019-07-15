@@ -18,6 +18,7 @@ func SaveTaskScript(task *InterpretorTask, fileContent []byte) error {
 			return err
 		}
 	}
+	task.Info.Provider = "interpretor"
 	if err := file.SaveJSON(filepath.Join(f, task.GetID()+".json"), task.GetInfo()); err != nil {
 		return err
 	}
@@ -42,7 +43,7 @@ func DeleteTaskScript(taskid string) error {
 		delete(tasks, taskid)
 		return nil
 	}
-	return errors.New("")
+	return errors.New("Task is not present or is not an interpretor task ")
 }
 
 // GetAllTaskScript ...
