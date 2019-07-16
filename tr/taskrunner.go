@@ -19,7 +19,6 @@ func fileHandlerMainLoop() {
 			go pipeline.StartFromRegister(trigger.File)
 		}
 	}
-
 }
 
 func init() {
