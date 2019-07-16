@@ -49,9 +49,9 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	time.Sleep(1 * time.Second)
 
 	// Demarre le file watcher
-	tr.CreateFileWatcher()
-	tr.AddFileWatch("./Makefile")
-
+	if err := tr.CreateFileWatcher(); err != nil {
+		panic(err)
+	}
 	// Configure la fonction d'handle des messages websocket
 	rpcproxy.WSMessageTrapper = messageTrapper
 

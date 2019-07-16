@@ -10,3 +10,24 @@ func (t *RPC) TriggerRegister(event, file string) {
 		File:  file,
 	}
 }
+
+// FileWatchRPC ...
+type FileWatchRPC struct{}
+
+func (f *FileWatchRPC) AddFile(file string) string {
+	if err := AddFileWatch(file); err != nil {
+		panic(err)
+	}
+	return "OK"
+}
+
+func (f *FileWatchRPC) RemoveFile(file string) string {
+	if err := RemoveFileWatch(file); err != nil {
+		panic(err)
+	}
+	return "OK"
+}
+
+func (f *FileWatchRPC) Files() []string {
+	return watchFiles
+}

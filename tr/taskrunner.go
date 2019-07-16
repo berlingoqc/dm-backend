@@ -16,7 +16,9 @@ func fileHandlerMainLoop() {
 		select {
 		case trigger := <-TriggerEventChannel:
 			println("EVENT ", trigger.Event, " for file ", trigger.File)
-			go pipeline.StartFromRegister(trigger.File)
+			if _, err := pipeline.StartFromRegister(trigger.File); err != nil {
+				println("Error starting register pipeline ", err.Error())
+			}
 		}
 	}
 }
