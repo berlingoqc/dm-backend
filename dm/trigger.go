@@ -2,8 +2,8 @@ package dm
 
 import (
 	"github.com/berlingoqc/dm-backend/rpcproxy"
-	"github.com/berlingoqc/dm-backend/tr"
 	"github.com/berlingoqc/dm-backend/tr/pipeline"
+	"github.com/berlingoqc/dm-backend/tr/triggers"
 )
 
 // DownloadEvent ...
@@ -24,7 +24,7 @@ func messageTrapper(msg rpcproxy.WSMessage) {
 			if event == string(OnDownloadOver) {
 				println("DOWNLOAD IS OVER")
 				if filePath, err := fileHandler.GetFilePath(rpcCall.Params); err == nil {
-					tr.TriggerEventChannel <- tr.TriggerEvent{
+					triggers.TriggerEventChannel <- triggers.TriggerEvent{
 						Event: event,
 						File:  filePath,
 					}

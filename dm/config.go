@@ -2,6 +2,7 @@ package dm
 
 import (
 	"errors"
+	"github.com/berlingoqc/dm-backend/tr/triggers"
 	"log"
 	"net/http"
 	"os"
@@ -10,7 +11,6 @@ import (
 	"github.com/berlingoqc/dm-backend/file"
 	"github.com/berlingoqc/dm-backend/program"
 	"github.com/berlingoqc/dm-backend/rpcproxy"
-	"github.com/berlingoqc/dm-backend/tr"
 	"github.com/berlingoqc/dm-backend/webserver"
 
 	"github.com/gorilla/mux"
@@ -49,7 +49,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	time.Sleep(1 * time.Second)
 
 	// Demarre le file watcher
-	if err := tr.CreateFileWatcher(); err != nil {
+	if err := triggers.CreateFileWatcher(); err != nil {
 		panic(err)
 	}
 	// Configure la fonction d'handle des messages websocket
@@ -75,7 +75,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	}
 	localHandler.Handlers["task"] = &task.RPCTask{}
 	localHandler.Handlers["pipeline"] = &pipeline.RPCPipeline{}
-	localHandler.Handlers["tr"] = &tr.RPC{}
+	localHandler.Handlers["tr"] = &triggers.RPC{}
 	localHandler.Handlers["fe"] = &file.RPC{}
 	localHandler.Handlers["program"] = &program.RPC{}
 	localHandler.Handlers["proxyws"] = &rpcproxy.RPCWS{}

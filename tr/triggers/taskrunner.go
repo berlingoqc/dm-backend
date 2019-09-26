@@ -1,11 +1,18 @@
-package tr
+package triggers
 
 import "github.com/berlingoqc/dm-backend/tr/pipeline"
 
 // TriggerEvent ...
 type TriggerEvent struct {
+	// The name of the event that trigger the pipeline
 	Event string
+	// File on witch to execute the pipeline
 	File  string
+}
+
+// RegisterTrigger ...
+type RegisterTrigger struct {
+
 }
 
 // TriggerEventChannel ...

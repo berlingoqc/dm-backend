@@ -1,6 +1,8 @@
-package tr
+package triggers
 
-import "github.com/fsnotify/fsnotify"
+import (
+	"github.com/fsnotify/fsnotify"
+)
 
 var watcher *fsnotify.Watcher
 var watchFiles []string
@@ -22,7 +24,11 @@ func CreateFileWatcher() error {
 	}
 
 	go func() {
-		defer watcher.Close()
+		defer func() {
+			if err := watcher.Close(); err != nil {
+				panic(err.Error())
+			}
+		}()
 		for {
 			select {
 			case event, ok := <-watcher.Events:
@@ -49,7 +55,9 @@ func CreateFileWatcher() error {
 
 func AddFileWatch(file string) error {
 	if watcher == nil {
-		CreateFileWatcher()
+		if err := CreateFileWatcher(); err != nil {
+			return err
+		}
 	}
 	watchFiles = append(watchFiles, file)
 	return watcher.Add(file)

@@ -1,4 +1,4 @@
-package tr
+package triggers
 
 // RPC ...
 type RPC struct{}

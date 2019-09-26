@@ -41,8 +41,6 @@ const (
 	OnTaskError = "onTaskError"
 	// OnTaskUpdate ...
 	OnTaskUpdate = "onTaskUpdate"
-	// OnPipelineRegisterUpdate ...
-	OnPipelineRegisterUpdate = "onPipelineRegisterUpdate"
 	// OnPipelineActiveUpdate ...
 	OnPipelineActiveUpdate = "onPipelineActiveUpdate"
 )
@@ -90,10 +88,6 @@ func eventOnTaskUpdate(id string, output []string) {
 	}{id, output})
 }
 
-func eventOnPipelineRegisterUpdate() {
-	FeedBack("pipeline", OnPipelineRegisterUpdate, RegisterPipelines)
-}
-
 func eventOnPipelineActiveUpdate() {
 	FeedBack("pipeline", OnPipelineActiveUpdate, ActivePipelines)
 }
@@ -111,7 +105,6 @@ type ActivePipelineStatus struct {
 	ActiveTask string              `json:"activetask"`
 	TaskOutput map[string][]string `json:"taskouput"`
 	TaskResult map[string][]string `json:"taskresult"`
-	Register   RegisterPipeline    `json:"register"`
 }
 
 // Variables ...
@@ -135,7 +128,6 @@ var Pipelines = make(map[string]Pipeline)
 // ActivePipelines contains the pipeline that are currently running
 var ActivePipelines = make(map[string]*ActivePipelineStatus)
 
-// StartOnLocalFile ...
 func StartOnLocalFile(filepath string, pipelineid string, data map[string]interface{}) (*ActivePipelineStatus, error) {
 	if _, err := os.Stat(filepath); os.IsNotExist(err) {
 		return nil, err

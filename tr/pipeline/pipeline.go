@@ -49,6 +49,8 @@ type taskQueue struct {
 }
 
 func startPipeline(id string, pip *Pipeline, data map[string]interface{}) (*ActivePipelineStatus, error) {
+	// Send the pipeline to the task dispatcher who ensure that the maximum amount of task are running
+	// at the same time
 	newPipeline := &Pipeline{}
 	cloneValue(pip, newPipeline)
 

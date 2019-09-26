@@ -6,8 +6,10 @@ import (
 	"strings"
 )
 
+/*
+* Load the pipeline file from the saved location , could be done later on if we want configuration
+*/
 func init() {
-	// Loading pipeline
 	folderPath := getWorkingPath()
 	files, err := ioutil.ReadDir(folderPath)
 	if err != nil {
