@@ -1,7 +1,5 @@
 package triggers
 
-import "github.com/berlingoqc/dm-backend/tr/pipeline"
-
 // TriggerEvent ...
 type TriggerEvent struct {
 	// The name of the event that trigger the pipeline
@@ -23,9 +21,7 @@ func fileHandlerMainLoop() {
 		select {
 		case trigger := <-TriggerEventChannel:
 			println("EVENT ", trigger.Event, " for file ", trigger.File)
-			if _, err := pipeline.StartFromRegister(trigger.File); err != nil {
-				println("Error starting register pipeline ", err.Error())
-			}
+			// Regarde quoi faire pour ce trigger
 		}
 	}
 }

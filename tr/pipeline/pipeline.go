@@ -33,7 +33,6 @@ func createActivePipeline(id string, pipelineid string) *ActivePipelineStatus {
 	status := &ActivePipelineStatus{Pipeline: pipelineid, State: PipelineRunning, File: id, TaskResult: make(map[string][]string), TaskOutput: make(map[string][]string)}
 	ActivePipelines[id] = status
 	eventOnPipelineActiveUpdate()
-	eventOnPipelineRegisterUpdate()
 	return status
 }
 

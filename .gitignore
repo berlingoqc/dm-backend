@@ -1,6 +1,5 @@
-dm-backend
 release/
 
-
 __debug_bin
+.idea/
 *.exe
