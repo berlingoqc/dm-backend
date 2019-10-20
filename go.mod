@@ -3,6 +3,7 @@ module github.com/berlingoqc/dm-backend
 go 1.12
 
 require (
+	github.com/berlingoqc/find-download-link v0.0.0-20191020183721-da96c152390f // indirect
 	github.com/cratonica/2goarray v0.0.0-20190331194516-514510793eaa // indirect
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/getlantern/context v0.0.0-20190109183933-c447772a6520 // indirect
@@ -22,5 +23,6 @@ require (
 	github.com/rs/cors v1.6.0
 	golang.org/x/crypto v0.0.0-20190621222207-cc06ce4a13d4 // indirect
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7
-	golang.org/x/tools v0.0.0-20190708171232-dd7c7173f160 // indirect
 )
+
+replace github.com/berlingoqc/find-download-link => ../find-download-link
