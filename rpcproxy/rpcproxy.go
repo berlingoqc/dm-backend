@@ -52,7 +52,7 @@ func handleRPCProxy(w http.ResponseWriter, r *http.Request) {
 func ProxyRPCRequest(host string, body []byte) ([]byte, error) {
 	u := url.URL{Scheme: "http", Host: host, Path: "/jsonrpc"}
 
-	resp, err := http.Post(u.String(), "appplication/json", bytes.NewBuffer(body))
+	resp, err := http.Post(u.String(), "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func RPCRequest(host string, call RPCCall, result interface{}) error {
 	if err != nil {
 		return err
 	}
-	resp, err := http.Post(u.String(), "appplication/json", bytes.NewBuffer(body))
+	resp, err := http.Post(u.String(), "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}

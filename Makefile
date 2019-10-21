@@ -23,6 +23,10 @@ install:
 	@mkdir -p /etc/dm
 	@cp config.json /etc/dm/
 
+configureLocalEnv:
+	@mkdir -p ${HOME}/.dm/{pipeline,config,script}
+	@cp config/aria2.conf ${HOME}/.dm/{config}
+
 release: build
 	@mkdir -p ./release/
 	@tar -zcvf ./release/$(RELEASE) $(PROJECT_NAME)
