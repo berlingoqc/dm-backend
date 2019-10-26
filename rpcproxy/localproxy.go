@@ -40,9 +40,15 @@ func (a *LocalHandler) Handle(body []byte) (b []byte, err error) {
 	method := strings.Split(rpcCall.Method, ".")
 	if len(method) > 1 {
 		if handler, ok := a.Handlers[method[0]]; ok {
-			argsIn := make([]reflect.Value, len(rpcCall.Params))
-			for i, v := range rpcCall.Params {
-				argsIn[i] = reflect.ValueOf(v)
+			var argsIn []reflect.Value
+			if rpcCall.Params != nil {
+				if list, ok := rpcCall.Params.([]interface{}); ok {
+					for _, v := range list {
+						argsIn = append(argsIn, reflect.ValueOf(v))
+					}
+				} else {
+					argsIn = append(argsIn, reflect.ValueOf(rpcCall.Params))
+				}
 			}
 			methodValue := reflect.ValueOf(handler).MethodByName(method[1])
 			if methodValue.IsValid() {
@@ -52,11 +58,7 @@ func (a *LocalHandler) Handle(body []byte) (b []byte, err error) {
 						return b, er
 					}
 				}
-				response := make([]interface{}, len(output))
-				for i, v := range output {
-					response[i] = v.Interface()
-				}
-				rpcCall.Result = response
+				rpcCall.Result = output[0].Interface()
 				b, err = json.Marshal(rpcCall)
 				return b, err
 			}

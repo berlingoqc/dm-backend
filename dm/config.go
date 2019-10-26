@@ -2,11 +2,12 @@ package dm
 
 import (
 	"errors"
-	"github.com/berlingoqc/dm-backend/tr/triggers"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/berlingoqc/dm-backend/tr/triggers"
 
 	"github.com/berlingoqc/dm-backend/file"
 	"github.com/berlingoqc/dm-backend/program"
@@ -19,19 +20,23 @@ import (
 	_ "github.com/berlingoqc/dm-backend/aria2"
 	_ "github.com/berlingoqc/dm-backend/ydl"
 
+	// load les tasks de base
+	_ "github.com/berlingoqc/dm-backend/tr/tasks"
+
 	"github.com/berlingoqc/dm-backend/tr/pipeline"
 	"github.com/berlingoqc/dm-backend/tr/task"
 
-	// load les tasks de base
-	_ "github.com/berlingoqc/dm-backend/tr/tasks"
+	"github.com/berlingoqc/find-download-link/api"
+	"github.com/berlingoqc/find-download-link/indexer"
 )
 
 // Config ...
 type Config struct {
-	URL      string                                  `json:"url"`
-	Handler  map[string]*rpcproxy.RPCHandlerEndpoint `json:"handler"`
-	Program  []*program.Settings                     `json:"program"`
-	Security *webserver.SecurityConfig               `json:"security"`
+	URL              string                                  `json:"url"`
+	Handler          map[string]*rpcproxy.RPCHandlerEndpoint `json:"handler"`
+	Program          []*program.Settings                     `json:"program"`
+	Security         *webserver.SecurityConfig               `json:"security"`
+	FindDownloadLink indexer.Settings                        `json:"find-download-link"`
 }
 
 // Load ...
@@ -80,6 +85,24 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	localHandler.Handlers["program"] = &program.RPC{}
 	localHandler.Handlers["proxyws"] = &rpcproxy.RPCWS{}
 
+	var err error
+
+	// Section configuration de find-download-link
+
+	indexer.SetSettings(config.FindDownloadLink)
+	indexer.FeedBack = func(ns, event string, data interface{}) {
+		rpcproxy.SendMessageWS("dm", ns, event, data)
+	}
+
+	localHandler.Handlers["findDownload"], err = api.GetFindDownloadAPI()
+	if err != nil {
+		return nil, err
+	}
+	localHandler.Handlers["findDownloadDaemon"], err = api.GetDaemonFindDownloadAPI()
+	if err != nil {
+		return nil, err
+	}
+
 	// Ajout le hander local avec la reflexion sur les existants
 	rpcproxy.RegisterLocalHandler("dm", localHandler)
 
@@ -90,8 +113,16 @@ func Load(filepath string) (*webserver.WebServer, error) {
 
 	r := mux.NewRouter()
 	handler := rpcproxy.Register(r)
+	/*	c := cors.New(cors.Options{
+			AllowedOrigins:   []string{"http://localhost:4200"},
+			AllowedHeaders:   []string{"X-Dm-Namespace"},
+			AllowCredentials: true,
+			Debug:            true,
+		})
+		handler = c.Handler(handler)
+	*/
 
-	r.Use(mux.CORSMethodMiddleware(r))
+	//r.Use(mux.CORSMethodMiddleware(r))
 
 	if config.Security.AuthKey != "" {
 		rpcproxy.ValidToken = func(token string, r *http.Request) error {

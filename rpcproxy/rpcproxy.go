@@ -85,7 +85,7 @@ func RPCRequest(host string, call RPCCall, result interface{}) error {
 	if err != nil {
 		return err
 	}
-	return mapstructure.Decode(rpcCall.Result[0], result)
+	return mapstructure.Decode(rpcCall.Result, result)
 }
 
 // Register this
@@ -116,5 +116,5 @@ func Register(mux *mux.Router) http.Handler {
 		s.Namesapce = append(s.Namesapce, k)
 	}
 
-	return cors.Default().Handler(mux)
+	return cors.AllowAll().Handler(mux)
 }

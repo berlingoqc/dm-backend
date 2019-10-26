@@ -2,12 +2,12 @@ package rpcproxy
 
 // RPCCall ...
 type RPCCall struct {
-	Jsonrpc string        `json:"jsonrpc"`
-	ID      string        `json:"id"`
-	Method  string        `json:"method"`
-	Params  []interface{} `json:"params"`
-	Result  []interface{} `json:"result"`
-	Error   interface{}   `json:"error"`
+	Jsonrpc string      `json:"jsonrpc"`
+	ID      string      `json:"id"`
+	Method  string      `json:"method"`
+	Params  interface{} `json:"params"`
+	Result  interface{} `json:"result"`
+	Error   interface{} `json:"error"`
 }
 
 // RPCHandlerEndpoint ...

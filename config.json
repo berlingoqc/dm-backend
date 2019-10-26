@@ -18,5 +18,72 @@
       "mode": "PATH",
       "args": ["--conf-path=/home/wq/.dm/config/aria2.conf"]
     }
-  ]
+  ],
+  "find-download-link": {
+    "database": {
+      "overwrite": false,
+      "path": "/home/wq/.dm/find-download-link.db"
+    },
+    "timeout": {
+      "betweenRequest": 1000,
+      "betweenPages": 3000,
+      "afterRejection": 5000,
+      "maxRetryAfterRejection": 3
+    },
+    "crawlers": {
+      "piratebay": {
+        "url": "https://proxtpb.art",
+        "browsings": {
+          "hdmovie": {
+            "path": "207",
+            "category": "hdmovie",
+            "criteria": {
+              "min_seeders": 10,
+              "tags": ["720p", "1080p", "webrip", "brrip", "blueray", "hdrip", "x264", "ac3", "english", "bluray", "brrip", "x264"]
+            }
+          },
+          "sdmovie": {
+            "path": "",
+            "category": "sdmovie",
+            "criteria": {
+              "min_seeders": 10,
+              "tags": []
+            }
+          }
+        }
+      }
+    },
+    "extraction_name_entity": {
+      "replacements": [
+        {
+          "from": "-",
+          "to": " "
+        },
+        {
+          "from": ".",
+          "to": " "
+        },
+        {
+          "from": "_",
+          "to": " "
+        },
+        {
+          "from": "[",
+          "to": ""
+        },
+        {
+          "from": "]",
+          "to": ""
+        },
+        {
+          "from": "(",
+          "to": ""
+        },
+        {
+          "from": ")",
+          "to": ""
+        }
+      ]
+    }
+  }
 }
