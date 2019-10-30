@@ -16,7 +16,9 @@
     {
       "name": "aria2c",
       "mode": "PATH",
-      "args": ["--conf-path=/home/wq/.dm/config/aria2.conf"]
+      "args": [
+        "--conf-path=/home/wq/.dm/config/aria2.conf"
+      ]
     }
   ],
   "find-download-link": {
@@ -30,25 +32,90 @@
       "afterRejection": 5000,
       "maxRetryAfterRejection": 3
     },
+    "criteria": {
+      "min_seeders": 10,
+      "tags": {
+        "video": [
+          "720p",
+          "1080p",
+          "ac3",
+          "xvid",
+          "dvdrip",
+          "ts",
+          "brrip",
+          "x264",
+          "mp4",
+          "blueray",
+          "webrip",
+          "web-dl",
+          "web",
+          "cam",
+          "hdrip",
+          "hc",
+          "hd",
+          "english",
+          "hdtc",
+          "dvdscr"
+        ],
+        "tv": [
+          "complete"
+        ],
+        "game": [
+          "repack",
+          "online",
+          "cracked"
+        ]
+      },
+      "category": {
+        "hdmovie": {
+          "tags": [
+            "video"
+          ]
+        },
+        "sdmovie": {
+          "tags": [
+            "video"
+          ]
+        },
+        "hdtvshow": {
+          "tags": [
+            "video",
+            "tv"
+          ]
+        },
+        "pc": {
+          "tags": [
+            "game"
+          ]
+        }
+      }
+    },
     "crawlers": {
       "piratebay": {
         "url": "https://proxtpb.art",
         "browsings": {
           "hdmovie": {
-            "path": "207",
-            "category": "hdmovie",
-            "criteria": {
-              "min_seeders": 10,
-              "tags": ["720p", "1080p", "webrip", "brrip", "blueray", "hdrip", "x264", "ac3", "english", "bluray", "brrip", "x264"]
-            }
+            "path": "207"
           },
           "sdmovie": {
-            "path": "",
-            "category": "sdmovie",
-            "criteria": {
-              "min_seeders": 10,
-              "tags": []
-            }
+            "path": "201"
+          },
+          "hdtvshow": {
+            "path": "208"
+          },
+          "tvshow": {
+            "path": "205"
+          },
+          "pc": {
+            "path": "401"
+          }
+        }
+      },
+      "rarby": {
+        "url": "https://rarbg.to/torrents.php?category=",
+        "browsings": {
+          "hdmovie": {
+            "path": "14;17;42;44;45;46;47;48;50;51;52"
           }
         }
       }

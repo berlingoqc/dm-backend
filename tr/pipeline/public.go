@@ -1,9 +1,6 @@
 package pipeline
 
 import (
-	"errors"
-	"os"
-
 	"github.com/berlingoqc/dm-backend/tr/task"
 )
 
@@ -127,13 +124,3 @@ var Pipelines = make(map[string]Pipeline)
 
 // ActivePipelines contains the pipeline that are currently running
 var ActivePipelines = make(map[string]*ActivePipelineStatus)
-
-func StartOnLocalFile(filepath string, pipelineid string, data map[string]interface{}) (*ActivePipelineStatus, error) {
-	if _, err := os.Stat(filepath); os.IsNotExist(err) {
-		return nil, err
-	}
-	if pipeline, ok := Pipelines[pipelineid]; ok {
-		return startPipeline(filepath, &pipeline, data)
-	}
-	return nil, errors.New("Pipeline not found")
-}

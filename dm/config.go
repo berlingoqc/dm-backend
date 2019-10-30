@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/berlingoqc/dm-backend/tr"
 	"github.com/berlingoqc/dm-backend/tr/triggers"
 
 	"github.com/berlingoqc/dm-backend/file"
@@ -17,8 +18,7 @@ import (
 	"github.com/gorilla/mux"
 
 	// load le module
-	_ "github.com/berlingoqc/dm-backend/aria2"
-	_ "github.com/berlingoqc/dm-backend/ydl"
+	"github.com/berlingoqc/dm-backend/aria2"
 
 	// load les tasks de base
 	_ "github.com/berlingoqc/dm-backend/tr/tasks"
@@ -58,7 +58,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 		panic(err)
 	}
 	// Configure la fonction d'handle des messages websocket
-	rpcproxy.WSMessageTrapper = messageTrapper
+	rpcproxy.WSMessageChannel = make(chan rpcproxy.WSMessage)
 
 	// Configure les handler pour le proxy rpc
 	for k, i := range config.Handler {
@@ -70,17 +70,30 @@ func Load(filepath string) (*webserver.WebServer, error) {
 		} else {
 			println("Could not found handler ", k)
 		}
-		if handler, ok := pipeline.Handlers[k]; ok {
-			handler.SetConfig(i)
-		}
 	}
 
+	// Configure les triggers utilisés pour le pipeline
+	wsTrapper := &triggers.WSTrapper{
+		Handler: map[string]triggers.WSEventHandler{
+			"aria2": &aria2.FileHandler{
+				Config: config.Handler["aria2"],
+			},
+		},
+		Events: map[int64]triggers.WatchInfo{},
+	}
+	triggers.Triggers["websocket"] = wsTrapper
+	triggers.Triggers["manual"] = &triggers.ManualFileTrigger{}
+
+	// Initiliaze le module de pipeline
+	tr.InitPipelineModule()
+
+	// Ajoute les modules RPC
 	localHandler := &rpcproxy.LocalHandler{
 		Handlers: make(map[string]interface{}),
 	}
 	localHandler.Handlers["task"] = &task.RPCTask{}
 	localHandler.Handlers["pipeline"] = &pipeline.RPCPipeline{}
-	localHandler.Handlers["tr"] = &triggers.RPC{}
+	localHandler.Handlers["trigger"] = &triggers.RPC{}
 	localHandler.Handlers["fe"] = &file.RPC{}
 	localHandler.Handlers["program"] = &program.RPC{}
 	localHandler.Handlers["proxyws"] = &rpcproxy.RPCWS{}
@@ -113,17 +126,6 @@ func Load(filepath string) (*webserver.WebServer, error) {
 
 	r := mux.NewRouter()
 	handler := rpcproxy.Register(r)
-	/*	c := cors.New(cors.Options{
-			AllowedOrigins:   []string{"http://localhost:4200"},
-			AllowedHeaders:   []string{"X-Dm-Namespace"},
-			AllowCredentials: true,
-			Debug:            true,
-		})
-		handler = c.Handler(handler)
-	*/
-
-	//r.Use(mux.CORSMethodMiddleware(r))
-
 	if config.Security.AuthKey != "" {
 		rpcproxy.ValidToken = func(token string, r *http.Request) error {
 			if token != config.Security.AuthKey {

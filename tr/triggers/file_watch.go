@@ -36,10 +36,7 @@ func CreateFileWatcher() error {
 					return
 				}
 				if event.Op&fsnotify.Write == fsnotify.Write {
-					TriggerEventChannel <- TriggerEvent{
-						File:  event.Name,
-						Event: "onFileWrite",
-					}
+					// notify
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {

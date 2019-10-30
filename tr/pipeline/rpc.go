@@ -30,15 +30,6 @@ func (r *RPCPipeline) GetActives() map[string]*ActivePipelineStatus {
 	return ActivePipelines
 }
 
-// StartOnLocalFile ....
-func (r *RPCPipeline) StartOnLocalFile(filepath string, pipelineid string, data map[string]interface{}) (status *ActivePipelineStatus) {
-	var err error
-	if status, err = StartOnLocalFile(filepath, pipelineid, data); err == nil {
-		return status
-	}
-	panic(err)
-}
-
 // Create ...
 func (r *RPCPipeline) Create(data map[string]interface{}) Pipeline {
 	var pipeline Pipeline

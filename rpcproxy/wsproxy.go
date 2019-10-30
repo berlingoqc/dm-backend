@@ -21,8 +21,8 @@ type WSMessage struct {
 	Data      RPCCall `json:"data"`
 }
 
-// WSMessageTrapper ...
-var WSMessageTrapper func(WSMessage)
+// WSMessageChannel ...
+var WSMessageChannel chan WSMessage
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true },
@@ -64,7 +64,7 @@ func clientMessageHandler() {
 			break
 		}
 
-		go WSMessageTrapper(v)
+		WSMessageChannel <- v
 
 		println("BROADCAST message from", v.Namespace)
 		for _, client := range clients {
