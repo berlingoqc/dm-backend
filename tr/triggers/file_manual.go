@@ -11,8 +11,13 @@ func (m *ManualFileTrigger) GetWatchInfo() *map[int64]WatchInfo {
 }
 
 // Init ...
-func (m *ManualFileTrigger) Init(triggerChannel chan PipelineTrigger) {
+func (m *ManualFileTrigger) Init(triggerChannel chan PipelineTrigger, _ chan interface{}) {
 	m.ch = triggerChannel
+}
+
+// DeleteWatch ...
+func (m *ManualFileTrigger) DeleteWatch(id int64) error {
+	return nil
 }
 
 // AddWatch ...

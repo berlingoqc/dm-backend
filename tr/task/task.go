@@ -56,10 +56,10 @@ type ITask interface {
 
 // TaskNode ...
 type TaskNode struct {
-	NodeID   string                 `json:"nodeid"`
-	TaskID   string                 `json:"taskid"`
-	Params   map[string]interface{} `json:"params"`
-	NextNode []*TaskNode            `json:"nextnode"`
+	NodeID   string            `json:"nodeid"`
+	TaskID   string            `json:"taskid"`
+	Params   map[string]string `json:"params"`
+	NextNode []*TaskNode       `json:"nextnode"`
 }
 
 var tasks = make(map[string]ITask)

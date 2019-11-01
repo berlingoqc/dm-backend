@@ -10,6 +10,7 @@ import (
 
 var ws *webserver.WebServer
 
+// Run ...
 func Run() *webserver.WebServer {
 
 	var configfile string

@@ -18,12 +18,38 @@ func (t *RPC) AddEvent(data interface{}) int64 {
 	dta, _ := json.Marshal(data)
 	var event AddEvent
 	json.Unmarshal(dta, &event)
-	if t, ok := Triggers[event.Trigger]; ok {
-		i, err := t.AddWatch(event.Info.Event, event.Info.Param, event.Info.Settings)
-		if err != nil {
-			panic(err)
-		}
-		return i
+	i, err := getTrigger(event.Trigger).AddWatch(event.Info.Event, event.Info.Param, event.Info.Settings)
+	if err != nil {
+		panic(err)
 	}
-	panic("NO TRIGGER")
+	return i
+}
+
+// RemoveEvent ...
+func (t *RPC) RemoveEvent(trigger string, id float64) int64 {
+	i := int64(id)
+	tr := getTrigger(trigger)
+	if err := tr.DeleteWatch(i); err != nil {
+		panic(err)
+	}
+	return i
+}
+
+// GetAllEvents ...
+func (t *RPC) GetAllEvents() map[int64]WatchInfo {
+	m := make(map[int64]WatchInfo)
+	for _, t := range Triggers {
+		p := t.GetWatchInfo()
+		for i, w := range *p {
+			m[i] = w
+		}
+	}
+	return m
+}
+
+func getTrigger(name string) ITrigger {
+	if t, ok := Triggers[name]; ok {
+		return t
+	}
+	panic("NO TRIGGER NAMED " + name)
 }

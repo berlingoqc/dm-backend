@@ -17,11 +17,10 @@ import (
 
 	"github.com/gorilla/mux"
 
-	// load le module
 	"github.com/berlingoqc/dm-backend/aria2"
 
 	// load les tasks de base
-	_ "github.com/berlingoqc/dm-backend/tr/tasks"
+	_ "github.com/berlingoqc/dm-backend/tr/task/impl"
 
 	"github.com/berlingoqc/dm-backend/tr/pipeline"
 	"github.com/berlingoqc/dm-backend/tr/task"
@@ -37,6 +36,7 @@ type Config struct {
 	Program          []*program.Settings                     `json:"program"`
 	Security         *webserver.SecurityConfig               `json:"security"`
 	FindDownloadLink indexer.Settings                        `json:"find-download-link"`
+	Pipeline         tr.Settings                             `json:"pipeline"`
 }
 
 // Load ...
@@ -85,7 +85,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	triggers.Triggers["manual"] = &triggers.ManualFileTrigger{}
 
 	// Initiliaze le module de pipeline
-	tr.InitPipelineModule()
+	tr.InitPipelineModule(config.Pipeline)
 
 	// Ajoute les modules RPC
 	localHandler := &rpcproxy.LocalHandler{

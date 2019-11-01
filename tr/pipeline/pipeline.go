@@ -30,7 +30,7 @@ func savePipelineFile(pipeline *Pipeline) error {
 }
 
 func createActivePipeline(id string, pipelineid string) *ActivePipelineStatus {
-	status := &ActivePipelineStatus{Pipeline: pipelineid, State: PipelineRunning, File: id, TaskResult: make(map[string][]string), TaskOutput: make(map[string][]string)}
+	status := &ActivePipelineStatus{Pipeline: pipelineid, State: PipelineRunning, File: id, TaskResult: make(map[string][]string), TaskOutput: make(map[string][]string), ChanPipelineSignal: make(chan int)}
 	ActivePipelines[id] = status
 	eventOnPipelineActiveUpdate()
 	return status
@@ -47,7 +47,8 @@ type taskQueue struct {
 	Previous *taskQueue `json:"previous"`
 }
 
-func StartPipeline(id string, pip *Pipeline, data map[string]interface{}) (*ActivePipelineStatus, error) {
+// StartPipeline ...
+func StartPipeline(id string, pip *Pipeline, data map[string]string) (*ActivePipelineStatus, error) {
 	// Send the pipeline to the task dispatcher who ensure that the maximum amount of task are running
 	// at the same time
 	newPipeline := &Pipeline{}
@@ -59,8 +60,13 @@ func StartPipeline(id string, pip *Pipeline, data map[string]interface{}) (*Acti
 	return status, nil
 }
 
-func pipeline(id string, status *ActivePipelineStatus, pipeline *Pipeline, data map[string]interface{}) {
+func pipeline(id string, status *ActivePipelineStatus, pipeline *Pipeline, data map[string]string) {
 	var t task.ITask
+
+	defer func() {
+		// Envoie au channel qu'on n'a finit d'executer pour cette pipeline
+		status.ChanPipelineSignal <- 0
+	}()
 
 	nextNodes := make(chan *taskQueue, 5)
 	chTasks := make(chan task.TaskFeedBack)
@@ -114,7 +120,7 @@ LoopNode:
 
 		params, _ := replaceParams(currentNode.Params, data)
 
-		go t.Execute(nextFile, params, chTasks)
+		go t.Execute(nextFile, castParameter(params), chTasks)
 
 	LoopTask:
 		for {
@@ -146,4 +152,12 @@ LoopNode:
 	}
 	status.State = PipelineOver
 	eventOnPipelineEnd(status)
+}
+
+func castParameter(dataInput map[string]string) map[string]interface{} {
+	m := make(map[string]interface{})
+	for k, v := range dataInput {
+		m[k] = v
+	}
+	return m
 }

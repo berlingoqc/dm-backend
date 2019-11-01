@@ -96,12 +96,13 @@ var (
 
 // ActivePipelineStatus ...
 type ActivePipelineStatus struct {
-	File       string              `json:"file"`
-	Pipeline   string              `json:"pipeline"`
-	State      State               `json:"state"`
-	ActiveTask string              `json:"activetask"`
-	TaskOutput map[string][]string `json:"taskouput"`
-	TaskResult map[string][]string `json:"taskresult"`
+	File               string              `json:"file"`
+	Pipeline           string              `json:"pipeline"`
+	State              State               `json:"state"`
+	ActiveTask         string              `json:"activetask"`
+	TaskOutput         map[string][]string `json:"taskouput"`
+	TaskResult         map[string][]string `json:"taskresult"`
+	ChanPipelineSignal chan int            `json:"-"`
 }
 
 // Variables ...
