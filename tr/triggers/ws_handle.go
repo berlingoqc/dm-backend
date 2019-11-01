@@ -51,7 +51,6 @@ func (w *WSTrapper) Init(triggerChannel chan PipelineTrigger, signal chan interf
 				case _ = <-signal:
 					println("End of ws handler")
 					return
-					break
 				default:
 					if strings.Contains(ws.Data.Method, watchInfo.Event) {
 						if handler, ok := w.Handler[ws.Namespace]; ok {

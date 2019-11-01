@@ -53,10 +53,6 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	// WAIT TEMPORAIRE
 	time.Sleep(1 * time.Second)
 
-	// Demarre le file watcher
-	if err := triggers.CreateFileWatcher(); err != nil {
-		panic(err)
-	}
 	// Configure la fonction d'handle des messages websocket
 	rpcproxy.WSMessageChannel = make(chan rpcproxy.WSMessage)
 
@@ -83,6 +79,7 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	}
 	triggers.Triggers["websocket"] = wsTrapper
 	triggers.Triggers["manual"] = &triggers.ManualFileTrigger{}
+	triggers.Triggers["file_watch"] = &triggers.FileWatchTrigger{}
 
 	// Initiliaze le module de pipeline
 	tr.InitPipelineModule(config.Pipeline)

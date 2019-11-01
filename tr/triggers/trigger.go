@@ -1,5 +1,10 @@
 package triggers
 
+import (
+	"math/rand"
+	"time"
+)
+
 // Settings ...
 type Settings struct {
 	RemoveAfterRun bool              `json:"remove_after_run"`
@@ -41,4 +46,10 @@ func InitTriggers() (chan PipelineTrigger, chan interface{}) {
 		t.Init(ch, chSignal)
 	}
 	return ch, chSignal
+}
+
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+func getID() int64 {
+	return r.Int63()
 }
