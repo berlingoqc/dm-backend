@@ -66,6 +66,11 @@ func InitPipelineModule(settings Settings) chan interface{} {
 								println(err)
 							}
 							runningPipeline[status.Pipeline] = status.ChanPipelineSignal
+							if len(stackPipeline) == 0 {
+								stackPipeline = stackPipeline[0:0]
+							} else {
+								stackPipeline = stackPipeline[1:len(stackPipeline)]
+							}
 						} else {
 							// Pipeline doesnt exists
 						}

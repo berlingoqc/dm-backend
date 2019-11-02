@@ -32,7 +32,7 @@ var testPipeline = &pipeline.Pipeline{
 	},
 	Node: &task.TaskNode{
 		NodeID: "abcd",
-		TaskID: "cp",
+		TaskID: "copy",
 		Params: map[string]string{
 			"destination": testFolderPath,
 		},
@@ -102,5 +102,4 @@ func executePipeline(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 }
