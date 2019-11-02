@@ -127,13 +127,14 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	}
 
 	r := mux.NewRouter()
-	// Servir le front-end si nécessaire
-	if config.FrontEnd.Serve {
-		r.Handle("/", http.FileServer(http.Dir("cmd/dm-backend/downloda-manager-ui/")))
-	}
 
 	// Enregistre le proxy RPC dans le router
 	handler := rpcproxy.Register(r)
+	// Servir le front-end si nécessaire
+	if config.FrontEnd.Serve {
+		fileServer := http.FileServer(http.Dir(config.FrontEnd.Location))
+		r.PathPrefix("/").Handler(fileServer)
+	}
 
 	// Ajout l'auth si nécessaire
 	if config.Security.AuthKey != "" {
