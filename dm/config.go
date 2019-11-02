@@ -29,9 +29,16 @@ import (
 	"github.com/berlingoqc/find-download-link/indexer"
 )
 
+// FrontEnd ..
+type FrontEnd struct {
+	Serve    bool   `json:"serve"`
+	Location string `json:"location"`
+}
+
 // Config ...
 type Config struct {
 	URL              string                                  `json:"url"`
+	FrontEnd         FrontEnd                                `json:"front-end"`
 	Handler          map[string]*rpcproxy.RPCHandlerEndpoint `json:"handler"`
 	Program          []*program.Settings                     `json:"program"`
 	Security         *webserver.SecurityConfig               `json:"security"`
@@ -122,7 +129,15 @@ func Load(filepath string) (*webserver.WebServer, error) {
 	}
 
 	r := mux.NewRouter()
+	// Servir le front-end si nécessaire
+	if config.FrontEnd.Serve {
+		r.Handle("/", http.FileServer(http.Dir("cmd/dm-backend/downloda-manager-ui/")))
+	}
+
+	// Enregistre le proxy RPC dans le router
 	handler := rpcproxy.Register(r)
+
+	// Ajout l'auth si nécessaire
 	if config.Security.AuthKey != "" {
 		rpcproxy.ValidToken = func(token string, r *http.Request) error {
 			if token != config.Security.AuthKey {
