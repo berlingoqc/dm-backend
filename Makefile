@@ -2,7 +2,7 @@ PROJECT_NAME := dm-backend
 VERSION := $(shell git describe --abbrev=0 --tags)
 PKG := github.com/berlingoqc/dm-backend
 
-RELEASE := $(PROJECT_NAME)_$(VERSION).tar.gz
+RELEASE := $(PROJECT_NAME).tar.gz
 
 PKG_LIST := $(shell go list ${PKG}/...)
 TEST_FILES := $(shell find . -name '*.go' | grep -v _test.go)
