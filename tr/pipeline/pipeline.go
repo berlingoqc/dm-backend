@@ -19,7 +19,8 @@ func getPipelineFilePath(id string) string {
 	return filepath.Join(GetWorkingPath(), id+".json")
 }
 
-func getPipelineFile(id string) (*Pipeline, error) {
+// GetPipelineFile ...
+func GetPipelineFile(id string) (*Pipeline, error) {
 	filepath := getPipelineFilePath(id)
 	pipeline := &Pipeline{}
 	return pipeline, file.LoadJSON(filepath, pipeline)

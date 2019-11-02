@@ -1,6 +1,10 @@
 package tr
 
 import (
+	"io/ioutil"
+	"path"
+	"strings"
+
 	"github.com/berlingoqc/dm-backend/tr/pipeline"
 	"github.com/berlingoqc/dm-backend/tr/triggers"
 )
@@ -20,6 +24,22 @@ var stopingPipelineRunnerCh chan interface{}
 
 // InitPipelineModule ...
 func InitPipelineModule(settings Settings) {
+
+	folderPath := pipeline.GetWorkingPath()
+	files, err := ioutil.ReadDir(folderPath)
+	if err != nil {
+		panic(err)
+	}
+	for _, f := range files {
+		println("Loading pipeline ", f.Name())
+		id := strings.TrimSuffix(f.Name(), path.Ext(f.Name()))
+		pip, err := pipeline.GetPipelineFile(id)
+		if err != nil {
+			panic(err)
+		}
+		pipeline.Pipelines[id] = *pip
+	}
+
 	chTriggerEvent, chClosingSignal = triggers.InitTriggers()
 	stopingPipelineRunnerCh = make(chan interface{})
 	go func() {

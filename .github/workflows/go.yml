@@ -17,7 +17,17 @@ jobs:
     - name: Get dependencies
       run: |
         sudo apt-get update && sudo apt-get install make
-        go get -t -d ./...
 
-    - name: Build
-      run: go build ./cmd/dm-backend
+    - name: Unit Test
+      run: make test
+    
+    - name: Race Test
+      run: make race
+    
+    - name: Msan Test
+      run: make msan
+    
+    - name: Release
+      run: make release
+
+
