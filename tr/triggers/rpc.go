@@ -18,7 +18,7 @@ func (t *RPC) AddEvent(data interface{}) int64 {
 	dta, _ := json.Marshal(data)
 	var event AddEvent
 	json.Unmarshal(dta, &event)
-	i, err := getTrigger(event.Trigger).AddWatch(event.Info.Event, event.Info.Param, event.Info.Settings)
+	i, err := GetTrigger(event.Trigger).AddWatch(event.Info.Event, event.Info.Param, event.Info.Settings)
 	if err != nil {
 		panic(err)
 	}
@@ -28,7 +28,7 @@ func (t *RPC) AddEvent(data interface{}) int64 {
 // RemoveEvent ...
 func (t *RPC) RemoveEvent(trigger string, id float64) int64 {
 	i := int64(id)
-	tr := getTrigger(trigger)
+	tr := GetTrigger(trigger)
 	if err := tr.DeleteWatch(i); err != nil {
 		panic(err)
 	}
@@ -47,7 +47,8 @@ func (t *RPC) GetAllEvents() map[int64]WatchInfo {
 	return m
 }
 
-func getTrigger(name string) ITrigger {
+// GetTrigger ...
+func GetTrigger(name string) ITrigger {
 	if t, ok := Triggers[name]; ok {
 		return t
 	}

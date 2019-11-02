@@ -1,5 +1,6 @@
 release/
 
+tr/pipeline_test
 __debug_bin
 .idea/
 *.exe

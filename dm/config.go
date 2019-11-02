@@ -85,8 +85,6 @@ func Load(filepath string) (*webserver.WebServer, error) {
 		Events: map[int64]triggers.WatchInfo{},
 	}
 	triggers.Triggers["websocket"] = wsTrapper
-	triggers.Triggers["manual"] = &triggers.ManualFileTrigger{}
-	triggers.Triggers["file_watch"] = &triggers.FileWatchTrigger{}
 
 	// Initiliaze le module de pipeline
 	tr.InitPipelineModule(config.Pipeline)

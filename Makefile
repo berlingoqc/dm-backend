@@ -9,7 +9,7 @@ TEST_FILES := $(shell find . -name '*.go' | grep -v _test.go)
 
 LDFLAGS := -ldflags "-X ${PKG}/api.Version=$(VERSION)"
 
-GOBUILD := go build -v $(LDFLAGS)
+GOBUILD := go build -v --tags="fts5" $(LDFLAGS)
 
 .PHONY: all dep build clean test install release
 
@@ -29,10 +29,10 @@ configureLocalEnv:
 
 release: build
 	@mkdir -p ./release/
-	@tar -zcvf ./release/$(RELEASE) $(PROJECT_NAME)
+	@tar -zcvf ./release/$(RELEASE) $(PROJECT_NAME) config.json dm-backend.service VERSION
 
 build: dep
-	$(GOBUILD)
+	$(GOBUILD) ./cmd/dm-backend
 
 clean:
 	@rm -rf ./release ./test *.exe

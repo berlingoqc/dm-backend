@@ -23,8 +23,9 @@ var (
 var stopingPipelineRunnerCh chan interface{}
 
 // InitPipelineModule ...
-func InitPipelineModule(settings Settings) {
-
+func InitPipelineModule(settings Settings) chan interface{} {
+	triggers.Triggers["manual"] = &triggers.ManualFileTrigger{}
+	triggers.Triggers["file_watch"] = &triggers.FileWatchTrigger{}
 	folderPath := pipeline.GetWorkingPath()
 	files, err := ioutil.ReadDir(folderPath)
 	if err != nil {
@@ -47,16 +48,17 @@ func InitPipelineModule(settings Settings) {
 		stackPipeline := []triggers.PipelineTrigger{}
 		// The channel to get when pipeline will stop
 		runningPipeline := make(map[string]chan int)
+	Loop:
 		for {
 			select {
 			case _ = <-stopingPipelineRunnerCh:
-				return
+				break Loop
 			case d := <-chTriggerEvent:
 				stackPipeline = append(stackPipeline, d)
 				break
 			default:
 				nbr := getPipelineRunning(&runningPipeline)
-				if nbr < settings.ConcurrentPipeline {
+				if len(stackPipeline) != 0 && nbr < settings.ConcurrentPipeline {
 					if te := getNextPipeline(stackPipeline); te != nil {
 						if p, ok := pipeline.Pipelines[te.PipelineID]; ok {
 							status, err := pipeline.StartPipeline(te.File, &p, te.Data)
@@ -76,7 +78,11 @@ func InitPipelineModule(settings Settings) {
 				break
 			}
 		}
+
+		println("END OF THIS")
 	}()
+
+	return stopingPipelineRunnerCh
 }
 
 // StopPipelineModule ...

@@ -39,7 +39,7 @@ func (r *RPCPipeline) Create(data map[string]interface{}) Pipeline {
 	if _, ok := Pipelines[pipeline.ID]; ok {
 		panic(errors.New("Pipeline already exists"))
 	}
-	if err := savePipelineFile(&pipeline); err != nil {
+	if err := SavePipelineFile(&pipeline); err != nil {
 		panic(err)
 	}
 	Pipelines[pipeline.ID] = pipeline

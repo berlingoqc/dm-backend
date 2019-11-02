@@ -2,7 +2,9 @@ package pipeline
 
 import (
 	"errors"
+	"math/rand"
 	"path/filepath"
+	"time"
 
 	"github.com/berlingoqc/dm-backend/file"
 	"github.com/berlingoqc/dm-backend/tr/task"
@@ -26,9 +28,15 @@ func GetPipelineFile(id string) (*Pipeline, error) {
 	return pipeline, file.LoadJSON(filepath, pipeline)
 }
 
-func savePipelineFile(pipeline *Pipeline) error {
+// SavePipelineFile ...
+func SavePipelineFile(pipeline *Pipeline) error {
 	filepath := getPipelineFilePath(pipeline.ID)
-	return file.SaveJSON(filepath, pipeline)
+	var err error
+	if err = file.SaveJSON(filepath, pipeline); err != nil {
+		return err
+	}
+	Pipelines[pipeline.ID] = *pipeline
+	return nil
 }
 
 func createActivePipeline(id string, pipelineid string) *ActivePipelineStatus {
@@ -162,4 +170,11 @@ func castParameter(dataInput map[string]string) map[string]interface{} {
 		m[k] = v
 	}
 	return m
+}
+
+var r = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+// GetID ...
+func GetID() int64 {
+	return r.Int63()
 }
