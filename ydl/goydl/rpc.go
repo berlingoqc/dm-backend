@@ -1,5 +1,0 @@
-package gorpc
-
-func init() {
-
-}

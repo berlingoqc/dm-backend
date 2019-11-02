@@ -9,7 +9,10 @@ github.com/antchfx/xmlquery v1.1.0 h1:vj0kZ1y3Q6my4AV+a9xbWrMYzubw+84zuiKgvfV8vb
 github.com/antchfx/xmlquery v1.1.0/go.mod h1:/+CnyD/DzHRnv2eRxrVbieRU/FIF6N0C+7oTtyUtCKk=
 github.com/antchfx/xpath v1.1.0 h1:mJTvYpiHvxNQRD4Lbfin/FodHVCHh2a5KrOFr4ZxMOI=
 github.com/antchfx/xpath v1.1.0/go.mod h1:Yee4kTMuNiPYJ7nSNorELQMr1J33uOpXDMByNYhvtNk=
+github.com/berlingoqc/find-download-link v0.0.0-20191020183721-da96c152390f h1:JV1sKQoKO/rY0xVVveuFUi/T7rROTtTF7giFNThGo8M=
 github.com/berlingoqc/find-download-link v0.0.0-20191020183721-da96c152390f/go.mod h1:/CkLTuzM6Hq/JyfN0SNfMShPZa3VG9JlTj+ChZj8vdA=
+github.com/berlingoqc/find-download-link v0.0.0-20191029212405-01b74d22696c h1:uncjaGz9VWw0UT3l8FCrcQvGOE28yCUEblmtvIEOdFA=
+github.com/berlingoqc/find-download-link v0.0.0-20191029212405-01b74d22696c/go.mod h1:HrtyV0fh9ueoDChKANtKe4cx+ENQa9x9YMxO/dyUSek=
 github.com/cratonica/2goarray v0.0.0-20190331194516-514510793eaa/go.mod h1:6Arca19mRx58CA7OWEd7Wu1NpC1rd3uDnNs6s1pj/DI=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

@@ -3,7 +3,7 @@ module github.com/berlingoqc/dm-backend
 go 1.13
 
 require (
-	github.com/berlingoqc/find-download-link v0.0.0-20191020183721-da96c152390f
+	github.com/berlingoqc/find-download-link v0.0.0-20191029212405-01b74d22696c
 	github.com/cratonica/2goarray v0.0.0-20190331194516-514510793eaa // indirect
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/go-stack/stack v1.8.0 // indirect
