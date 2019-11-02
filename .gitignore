@@ -1,5 +1,7 @@
 release/
 
+dm_backend*
+
 tr/pipeline_test
 __debug_bin
 .idea/
