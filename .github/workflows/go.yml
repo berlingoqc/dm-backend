@@ -16,7 +16,8 @@ jobs:
 
     - name: Get dependencies
       run: |
-        go get -v -t -d ./...
+        apt-get update && apt-get install make
+        go get -t -d ./...
 
     - name: Build
-      run: go build -v ./cmd/dm-backend
+      run: go build ./cmd/dm-backend
