@@ -9,13 +9,14 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-func getWorkingPath() string {
+// GetWorkingPath ...
+var GetWorkingPath = func() string {
 	dir, _ := homedir.Dir()
 	return filepath.Join(dir, ".dm", "pipeline")
 }
 
 func getPipelineFilePath(id string) string {
-	return filepath.Join(getWorkingPath(), id+".json")
+	return filepath.Join(GetWorkingPath(), id+".json")
 }
 
 func getPipelineFile(id string) (*Pipeline, error) {

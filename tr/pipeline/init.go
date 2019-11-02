@@ -8,9 +8,9 @@ import (
 
 /*
 * Load the pipeline file from the saved location , could be done later on if we want configuration
-*/
+ */
 func init() {
-	folderPath := getWorkingPath()
+	folderPath := GetWorkingPath()
 	files, err := ioutil.ReadDir(folderPath)
 	if err != nil {
 		panic(err)

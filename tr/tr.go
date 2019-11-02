@@ -16,9 +16,12 @@ var (
 	settings        Settings
 )
 
+var stopingPipelineRunnerCh chan interface{}
+
 // InitPipelineModule ...
 func InitPipelineModule(settings Settings) {
 	chTriggerEvent, chClosingSignal = triggers.InitTriggers()
+	stopingPipelineRunnerCh = make(chan interface{})
 	go func() {
 		// The stack of pipeline waiting to be execute
 		stackPipeline := []triggers.PipelineTrigger{}
@@ -26,6 +29,8 @@ func InitPipelineModule(settings Settings) {
 		runningPipeline := make(map[string]chan int)
 		for {
 			select {
+			case _ = <-stopingPipelineRunnerCh:
+				return
 			case d := <-chTriggerEvent:
 				stackPipeline = append(stackPipeline, d)
 				break
@@ -59,6 +64,7 @@ func StopPipelineModule() {
 	for i := 0; i < 5; i++ {
 		chClosingSignal <- i
 	}
+	stopingPipelineRunnerCh <- 0
 }
 
 func getPipelineRunning(m *map[string]chan int) int {
