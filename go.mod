@@ -1,6 +1,6 @@
 module github.com/berlingoqc/dm-backend
 
-go 1.12
+go 1.13
 
 require (
 	github.com/berlingoqc/find-download-link v0.0.0-20191020183721-da96c152390f
@@ -16,5 +16,3 @@ require (
 	github.com/rs/cors v1.7.0
 	golang.org/x/crypto v0.0.0-20190621222207-cc06ce4a13d4 // indirect
 )
-
-replace github.com/berlingoqc/find-download-link => ../find-download-link
