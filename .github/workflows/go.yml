@@ -16,7 +16,7 @@ jobs:
 
     - name: Get dependencies
       run: |
-        apt-get update && apt-get install make
+        sudo apt-get update && sudo apt-get install make
         go get -t -d ./...
 
     - name: Build
