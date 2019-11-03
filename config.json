@@ -1,5 +1,8 @@
 {
   "url": "0.0.0.0:3434",
+  "pipeline": {
+    "concurrent_pipeline": 3
+  },
   "front-end": {
     "serve": true,
     "location": "/home/wq/Project/dm-ui/dist/dm-ui"

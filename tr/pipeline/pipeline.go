@@ -128,9 +128,12 @@ LoopNode:
 		nextFile := taskQueueCurrent.Previous.Result[taskQueueCurrent.Index]
 		println("Starting task on file ", nextFile)
 
-		params, _ := replaceParams(currentNode.Params, data)
-
-		go t.Execute(nextFile, castParameter(params), chTasks)
+		if params, err := replaceParams(currentNode.Params, data); err != nil {
+			eventOnPipelineError(err)
+			break LoopNode
+		} else {
+			go t.Execute(nextFile, castParameter(params), chTasks)
+		}
 
 	LoopTask:
 		for {
@@ -152,7 +155,14 @@ LoopNode:
 					status.TaskResult[currentNode.TaskID] = append(status.TaskResult[t.GetID()], feedback.Message.(string))
 					eventOnTaskUpdate(currentNode.NodeID, status.TaskResult[currentNode.TaskID])
 				case task.ErrorFeedBack:
-					err := feedback.Message.(error)
+					var err error
+					switch v := feedback.Message.(type) {
+					case error:
+						err = v
+						break
+					case string:
+						err = errors.New(v)
+					}
 					status.TaskResult[currentNode.TaskID] = append(status.TaskResult[t.GetID()], err.Error())
 					eventOnTaskError(currentNode.NodeID, err, status.TaskResult[currentNode.TaskID])
 					break LoopNode

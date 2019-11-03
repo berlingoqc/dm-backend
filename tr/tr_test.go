@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/berlingoqc/dm-backend/rpcproxy"
 	"github.com/berlingoqc/dm-backend/tr"
 	"github.com/berlingoqc/dm-backend/tr/pipeline"
 	"github.com/berlingoqc/dm-backend/tr/task"
@@ -34,7 +35,7 @@ var testPipeline = &pipeline.Pipeline{
 		NodeID: "abcd",
 		TaskID: "copy",
 		Params: map[string]string{
-			"destination": testFolderPath,
+			"destination": testFolderPath + "/${PATH}/",
 		},
 		NextNode: []*task.TaskNode{},
 	},
@@ -45,6 +46,9 @@ var pipelineData = map[string]string{
 }
 
 var channelClosing chan interface{}
+
+var eventPipelineChannel = make(chan rpcproxy.WSMessage)
+
 var rpc = triggers.RPC{}
 var err error
 
@@ -78,7 +82,14 @@ func initModule(t *testing.T) {
 	tr.InitPipelineModule(settings)
 
 	pipeline.FeedBack = func(namespace string, event string, data interface{}) {
-		fmt.Printf("NAMESPACE %s EVENT %s ", namespace, event)
+		fmt.Printf("NAMESPACE %s EVENT %s \n", namespace, event)
+		eventPipelineChannel <- rpcproxy.WSMessage{
+			Namespace: namespace,
+			Data: rpcproxy.RPCCall{
+				Method: event,
+				Result: data,
+			},
+		}
 	}
 }
 
@@ -96,10 +107,26 @@ func getPipeline(t *testing.T) {
 }
 
 func executePipeline(t *testing.T) {
-	_, err := triggers.GetTrigger("manual").AddWatch("", "MakeFile", &triggers.Settings{
+	_, err := triggers.GetTrigger("manual").AddWatch("", "tr.go", &triggers.Settings{
 		PipelineID: "copyPipeline",
+		Data:       pipelineData,
 	})
 	if err != nil {
 		t.Error(err)
+	}
+
+Loop:
+	for {
+		select {
+		case e := <-eventPipelineChannel:
+
+			if e.Data.Method == "onPipelineError" {
+				t.Error("Error executing pipeline ", e.Data.Result)
+			}
+			if e.Data.Method == "onPipelineEnd" {
+				break Loop
+			}
+			break
+		}
 	}
 }
