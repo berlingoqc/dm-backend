@@ -2,10 +2,11 @@ package task
 
 // Params ...
 type Params struct {
-	Name        string `json:"name"`
-	Type        string `json:"type"`
-	Optional    bool   `json:"optional"`
-	Description string `json:"description"`
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	Optional     bool   `json:"optional"`
+	DefaultValue string `json:"default_value"`
+	Description  string `json:"description"`
 }
 
 // Return ...

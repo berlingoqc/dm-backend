@@ -6,6 +6,7 @@ func init() {
 	task.RegisterTask(&CPTask{})
 	task.RegisterTask(&ZipTask{})
 	task.RegisterTask(&SleepTask{})
+	task.RegisterTask(&FFMPEGConvertVideo{})
 
 	tasks, err := task.GetAllTaskScript()
 	if err != nil {
