@@ -53,7 +53,5 @@ func (s *SleepTask) Execute(file string, params map[string]interface{}, channel 
 	duration, _ := strconv.Atoi(d)
 	time.Sleep(time.Duration(duration) * time.Millisecond)
 
-	task.SendDone(channel, task.TaskOver{
-		Files: []string{file},
-	})
+	task.SendDone(channel, []string{file})
 }

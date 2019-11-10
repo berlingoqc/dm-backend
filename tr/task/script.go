@@ -108,7 +108,5 @@ func (b *InterpretorTask) Execute(file string, params map[string]interface{}, ch
 		}
 	}
 	files := strings.Split(lastLine, ";")
-	SendDone(channel, TaskOver{
-		Files: removeEmptyStr(files),
-	})
+	SendDone(channel, removeEmptyStr(files))
 }

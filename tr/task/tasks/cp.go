@@ -64,7 +64,5 @@ func (c *CPTask) Execute(fp string, params map[string]interface{}, channel chan 
 		channel <- task.TaskFeedBack{Event: task.ErrorFeedBack, Message: err}
 		return
 	}
-	task.SendDone(channel, task.TaskOver{
-		Files: []string{fp, c.destination},
-	})
+	task.SendDone(channel, []string{fp, c.destination})
 }

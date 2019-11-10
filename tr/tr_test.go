@@ -12,7 +12,7 @@ import (
 	"github.com/berlingoqc/dm-backend/tr/triggers"
 
 	// for the task
-	_ "github.com/berlingoqc/dm-backend/tr/task/impl"
+	_ "github.com/berlingoqc/dm-backend/tr/task/tasks"
 )
 
 const testFolderPath = "./pipeline_test"

@@ -20,7 +20,7 @@ import (
 	"github.com/berlingoqc/dm-backend/aria2"
 
 	// load les tasks de base
-	_ "github.com/berlingoqc/dm-backend/tr/task/impl"
+	_ "github.com/berlingoqc/dm-backend/tr/task/tasks"
 
 	"github.com/berlingoqc/dm-backend/tr/pipeline"
 	"github.com/berlingoqc/dm-backend/tr/task"

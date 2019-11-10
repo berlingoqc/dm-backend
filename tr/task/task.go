@@ -90,9 +90,28 @@ func SendError(ch chan TaskFeedBack, er error) {
 }
 
 // SendDone ...
-func SendDone(ch chan TaskFeedBack, msg interface{}) {
+func SendDone(ch chan TaskFeedBack, returnFiles []string) {
 	ch <- TaskFeedBack{
-		Event:   "DONE",
+		Event: "DONE",
+		Message: TaskOver{
+			Files: returnFiles,
+		},
+	}
+}
+
+// SendUpdate ...
+func SendUpdate(ch chan TaskFeedBack, msg interface{}) {
+	ch <- TaskFeedBack{
+		Event:   OutFeedBack,
 		Message: msg,
+	}
+}
+
+// SendTaskOver ...
+func SendTaskOver(ch chan TaskFeedBack, err error, files []string) {
+	if err != nil {
+		SendError(ch, err)
+	} else {
+		SendDone(ch, files)
 	}
 }

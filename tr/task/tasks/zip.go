@@ -73,7 +73,5 @@ func (c *ZipTask) Execute(filepath string, params map[string]interface{}, channe
 		}
 	}
 
-	task.SendDone(channel, task.TaskOver{
-		Files: []string{zipParam.Destination},
-	})
+	task.SendDone(channel, []string{zipParam.Destination})
 }
